@@ -3,7 +3,7 @@ This project is a library to create raster art through code, the first iteration
 
 # Setup 
 
-Clone sub-repos (addons/glfw)
+You will need a Mac.
 
 Then
 
