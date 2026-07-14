@@ -1,0 +1,3 @@
+[submodule "addons/glfw"]
+	path = addons/glfw
+	url = https://github.com/glfw/glfw.git
