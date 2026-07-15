@@ -2,12 +2,30 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "RUN_IMMEDIATE",
+            "type": "shell",
+            "command": "cd build && cmake .. && cd .. && cmake --build ./build && open ./bin/BrushPY.app",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
             "label": "cmake-build",
             "type": "shell",
             "command": "cmake --build build",
             "group": {
                 "kind": "build",
-                "isDefault": true
             },
             "options": {
                 "cwd": "${workspaceFolder}"

@@ -4,12 +4,13 @@
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
 #include <QuartzCore/QuartzCore.hpp>
-
+#include <iostream>
 #include "Renderer.h"
 
 Renderer::Renderer(MTL::Device *device, CA::MetalLayer *layer)
     : _device(device), _layer(layer) {
   _commandQueue = _device->newCommandQueue();
+  std::cout << "BrushPY Renderer ready" << std::endl;
 }
 
 Renderer::~Renderer() { _commandQueue->release(); }
