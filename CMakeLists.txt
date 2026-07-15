@@ -44,28 +44,13 @@ if(NOT CMAKE_GENERATOR STREQUAL "Xcode")
     set(RESOURCES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin/BrushPY.app/Contents/Resources")
     set(METALLIB "${RESOURCES_DIR}/default.metallib")
 
-    set(AIR_FILES)
-    foreach(METAL_SRC ${SHADER_FILES})
-        get_filename_component(NAME ${METAL_SRC} NAME_WE)
-        set(AIR "${CMAKE_BINARY_DIR}/${NAME}.air")
-        add_custom_command(
-            OUTPUT  ${AIR}
-            COMMAND xcrun -sdk macosx metal -c ${METAL_SRC} -o ${AIR}
-            DEPENDS ${METAL_SRC}
-            COMMENT "Compiling ${NAME}.metal → ${NAME}.air"
-        )
-        list(APPEND AIR_FILES ${AIR})
-    endforeach()
-
-    add_custom_command(
-        OUTPUT  ${METALLIB}
+    add_custom_target(MetalShaders ALL
         COMMAND ${CMAKE_COMMAND} -E make_directory ${RESOURCES_DIR}
-        COMMAND xcrun -sdk macosx metallib ${AIR_FILES} -o ${METALLIB}
-        DEPENDS ${AIR_FILES}
-        COMMENT "Linking default.metallib"
+        COMMAND xcrun -sdk macosx metal ${SHADER_FILES} -o ${METALLIB}
+        SOURCES ${SHADER_FILES}
+        COMMENT "Compiling Metal shaders → default.metallib"
     )
 
-    add_custom_target(MetalShaders DEPENDS ${METALLIB})
     add_dependencies(BrushPY MetalShaders)
 endif()
 

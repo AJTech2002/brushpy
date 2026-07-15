@@ -1,0 +1,6 @@
+- iPad Companion App
+	- The actual app shouldn't even try to replace the Mac one, it's a combo - the companion app simply allows you to add Strokes when you want and do various things that are easier with your fingers, it connects back via USB-C
+	- somehow I need to get the actual brush logic to run in realtime while using it on the iPad - that's a challenge but it will be so cool
+	- This is better because there's so much you can do on the PC like use Tensorflow, do real art with AI
+	- When you draw a stroke it should automatically create a scene object and copy the id to clipboard or place it in the editor
+	- Importing / taking photos + connection with Procreate (<->)

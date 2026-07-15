@@ -8,6 +8,16 @@
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
     return YES;
 }
+- (void)applicationDidFinishLaunching:(NSNotification *)notification {
+    [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown
+                                          handler:^NSEvent *(NSEvent *event) {
+        if (event.keyCode == 53) { // 53 = Esc
+            [NSApp terminate:nil];
+            return nil;
+        }
+        return event;
+    }];
+}
 - (void)applicationWillTerminate:(NSNotification *)notification {
     stop();
 }
@@ -19,7 +29,7 @@ int main() {
     [NSApp setDelegate:[[AppDelegate alloc] init]];
 
     NSWindow* window = [[NSWindow alloc]
-        initWithContentRect:NSMakeRect(0, 0, 800, 600)
+        initWithContentRect:NSMakeRect(0, 0, WIDTH, HEIGHT)
                   styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable
                     backing:NSBackingStoreBuffered
                       defer:NO];
