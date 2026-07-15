@@ -1,24 +1,31 @@
-#import <Cocoa/Cocoa.h>
-#include <Foundation/Foundation.h>
-#import <Metal/Metal.h>
-#import <QuartzCore/CAMetalLayer.h>
-#import <QuartzCore/CADisplayLink.h>
-#import "renderer.h"
+#include "app.h"
+#include "Renderer.h"
 #import <AppKit/NSScreen.h>
+#import <Cocoa/Cocoa.h>
+#import <Metal/Metal.h>
+#import <QuartzCore/CADisplayLink.h>
+#import <QuartzCore/CAMetalLayer.h>
 
 static id<MTLDevice> gDevice;
-static id<MTLCommandQueue> gCommandQueue;
 static CAMetalLayer *gLayer;
 static Renderer *gRenderer;
 static CADisplayLink *gDisplayLink;
 
-#include "app.h"
+// Thin ObjC trampoline: CADisplayLink requires an ObjC target/selector.
+// All rendering logic lives in the C++ Renderer.
+@interface DisplayLinkTarget : NSObject
+@end
+@implementation DisplayLinkTarget
+- (void)tick:(CADisplayLink *)link {
+  gRenderer->draw();
+}
+@end
+static DisplayLinkTarget *gTarget;
 
 void start(void *contentView) {
   NSView *view = (__bridge NSView *)contentView;
 
   gDevice = MTLCreateSystemDefaultDevice();
-  gCommandQueue = [gDevice newCommandQueue];
 
   gLayer = [CAMetalLayer layer];
   gLayer.device = gDevice;
@@ -28,17 +35,25 @@ void start(void *contentView) {
   view.wantsLayer = YES;
   [view setLayer:gLayer];
 
-  NSLog(@"Yo! Metal is ready: %@ (%dx%d)", gDevice.name,
-        (int)view.bounds.size.width, (int)view.bounds.size.height);
-  
-  gRenderer = [[Renderer alloc] initWithDevice:gDevice layer:gLayer];
-  gDisplayLink = [[NSScreen mainScreen] displayLinkWithTarget:gRenderer selector:@selector(draw:)];
-  
-  [gDisplayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+  NSLog(@"Metal ready: %@ (%dx%d)", gDevice.name, (int)view.bounds.size.width,
+        (int)view.bounds.size.height);
+
+  // Cast ObjC pointers to metal-cpp C++ types (same pointer, different type).
+  MTL::Device *device = (MTL::Device *)(__bridge void *)gDevice;
+  CA::MetalLayer *layer = (CA::MetalLayer *)(__bridge void *)gLayer;
+  gRenderer = new Renderer(device, layer);
+
+  gTarget = [[DisplayLinkTarget alloc] init];
+  gDisplayLink = [[NSScreen mainScreen] displayLinkWithTarget:gTarget
+                                                     selector:@selector(tick:)];
+  [gDisplayLink addToRunLoop:[NSRunLoop mainRunLoop]
+                     forMode:NSRunLoopCommonModes];
 }
 
 void stop(void) {
   [gDisplayLink invalidate];
   gDisplayLink = nil;
-  gRenderer = nil;
+  gTarget = nil;
+  delete gRenderer;
+  gRenderer = nullptr;
 }

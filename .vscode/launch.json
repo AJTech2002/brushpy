@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/BrushPY.app/Contents/MacOS/BrushPY",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "cmake-build",
+            "env": {
+                "MTL_DEBUG_LAYER": "1"
+            }
+        },
+        {
+            "name": "Run (no breakpoints)",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/BrushPY.app/Contents/MacOS/BrushPY",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "cmake-build",
+            "noDebug": true
+        }
+    ]
+}

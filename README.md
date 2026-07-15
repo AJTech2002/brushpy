@@ -5,18 +5,10 @@ This project is a library to create raster art through code, the first iteration
 
 You will need a Mac.
 
-Then
+Then in Root:
 
 ```
-mkdir build
-cd build
-cmake ..
-```
-
-then back in root, whenever you want to **run**:
-
-```
-cmake --build ./build && ./bin/BrushPy
+cd build && cmake .. && cd .. && cmake --build ./build && open ./bin/BrushPY.app
 ```
 
 This project can compile & run without XCode however for debugging & writing shaders to generate an XCode project you can:

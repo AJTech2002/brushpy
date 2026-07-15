@@ -1,10 +1,22 @@
 #pragma once
-#import <Metal/Metal.h>
-#import <QuartzCore/CAMetalLayer.h>
-#include <QuartzCore/QuartzCore.h>
 
-@interface Renderer : NSObject
-- (instancetype)initWithDevice:(id<MTLDevice>)device
-                         layer:(CAMetalLayer *)layer;
-- (void)draw:(CADisplayLink *)displayLink;
-@end
+namespace MTL {
+class Device;
+class CommandQueue;
+} // namespace MTL
+
+namespace CA {
+class MetalLayer;
+}
+
+class Renderer {
+public:
+  Renderer(MTL::Device *device, CA::MetalLayer *layer);
+  ~Renderer();
+  void draw();
+
+private:
+  MTL::Device *_device;
+  CA::MetalLayer *_layer;
+  MTL::CommandQueue *_commandQueue;
+};
