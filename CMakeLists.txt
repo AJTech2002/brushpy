@@ -25,8 +25,8 @@ target_link_libraries(BrushPY
     "-framework CoreGraphics"
     "-framework CoreImage"
     "-framework QuartzCore"
-    ## Metal
     "-framework Metal"
+    "-framework CoreVideo"
 )
 
 

@@ -1,9 +1,22 @@
 #import <Cocoa/Cocoa.h>
 #include "app.h"
 
+@interface AppDelegate : NSObject <NSApplicationDelegate>
+@end
+
+@implementation AppDelegate
+- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
+    return YES;
+}
+- (void)applicationWillTerminate:(NSNotification *)notification {
+    stop();
+}
+@end
+
 int main() {
     [NSApplication sharedApplication];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+    [NSApp setDelegate:[[AppDelegate alloc] init]];
 
     NSWindow* window = [[NSWindow alloc]
         initWithContentRect:NSMakeRect(0, 0, 800, 600)
