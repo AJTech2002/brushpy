@@ -18,3 +18,11 @@ then back in root, whenever you want to **run**:
 ```
 cmake --build ./build && ./bin/BrushPy
 ```
+
+This project can compile & run without XCode however for debugging & writing shaders to generate an XCode project you can:
+
+```
+sh ./generate-xcode.sh
+```
+
+Then open with the generated XCode Project File.

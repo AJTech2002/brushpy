@@ -4,3 +4,5 @@
 /libs
 /addons
 /logs/.obsidian
+/logs/private
+/xcode-build

@@ -42,8 +42,6 @@
   id<MTLRenderCommandEncoder> encoder =
       [command_buffer renderCommandEncoderWithDescriptor:descriptor];
 
-    
-
   [encoder endEncoding];
   [command_buffer presentDrawable:drawable];
   [command_buffer commit];

@@ -1,0 +1,17 @@
+# --- metal-lsp:begin ---
+If:
+  PathMatch: .*\.metal
+
+CompileFlags:
+  Add:
+    - -xc++
+    - -std=c++17
+    - -Wno-unknown-attributes
+    - -Wno-reserved-user-defined-literal
+    - -include
+    - /Users/ajayvenkat/.vscode/extensions/rayanhtt.metal-lsp-1.4.0/headers/metal_compat.h
+    - -isystem
+    - /Users/ajayvenkat/.vscode/extensions/rayanhtt.metal-lsp-1.4.0/stubs
+    - -I
+    - /Users/ajayvenkat/Development/metal-procedural-art
+# --- metal-lsp:end ---
