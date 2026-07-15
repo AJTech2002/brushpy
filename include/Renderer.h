@@ -3,6 +3,10 @@
 namespace MTL {
 class Device;
 class CommandQueue;
+class CommandBuffer;
+class RenderPassDescriptor;
+class RenderCommandEncoder;
+
 } // namespace MTL
 
 namespace CA {
@@ -19,4 +23,7 @@ private:
   MTL::Device *_device;
   CA::MetalLayer *_layer;
   MTL::CommandQueue *_commandQueue;
+
+  void createRenderPipeline();
+  void encodeRenderCommands(MTL::RenderCommandEncoder* renderCommandEncoder);
 };
