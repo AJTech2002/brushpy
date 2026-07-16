@@ -6,7 +6,7 @@ class CommandQueue;
 class CommandBuffer;
 class RenderPassDescriptor;
 class RenderCommandEncoder;
-
+class Texture;
 } // namespace MTL
 
 namespace CA {
@@ -18,6 +18,8 @@ public:
   Renderer(MTL::Device *device, CA::MetalLayer *layer);
   ~Renderer();
   void draw();
+  MTL::Texture *getOutputTexture() const;
+  MTL::Texture *getInputTexture() const;
 
 private:
   MTL::Device *_device;
@@ -25,5 +27,5 @@ private:
   MTL::CommandQueue *_commandQueue;
 
   void createRenderPipeline();
-  void encodeRenderCommands(MTL::RenderCommandEncoder* renderCommandEncoder);
+  void encodeRenderCommands(MTL::RenderCommandEncoder *renderCommandEncoder);
 };
