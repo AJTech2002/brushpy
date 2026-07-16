@@ -4,6 +4,10 @@
 class Layer;
 class Renderer;
 
+namespace MTL {
+class ComputePipelineState;
+};
+
 class Canvas {
 
 public:
@@ -21,6 +25,8 @@ public:
 
 private:
   std::vector<Layer *> _layers;
+  MTL::ComputePipelineState *metalComputePSO;
+
   int _width;
   int _height;
 };
