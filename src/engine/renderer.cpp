@@ -23,6 +23,19 @@ MTL::Texture *outputBufferA;
 MTL::Texture *outputBufferB;
 bool renderBufferA = true;
 
+Renderer *Renderer::_instance = nullptr;
+
+Renderer &Renderer::instance() { return *_instance; }
+
+void Renderer::init(MTL::Device *device, CA::MetalLayer *layer) {
+  _instance = new Renderer(device, layer);
+}
+
+void Renderer::destroy() {
+  delete _instance;
+  _instance = nullptr;
+}
+
 Renderer::Renderer(MTL::Device *device, CA::MetalLayer *layer)
     : _device(device), _layer(layer) {
   _commandQueue = _device->newCommandQueue();

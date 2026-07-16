@@ -15,13 +15,22 @@ class MetalLayer;
 
 class Renderer {
 public:
-  Renderer(MTL::Device *device, CA::MetalLayer *layer);
-  ~Renderer();
+  static Renderer &instance();
+  static void init(MTL::Device *device, CA::MetalLayer *layer);
+  static void destroy();
+
   void draw();
   MTL::Texture *getOutputTexture() const;
   MTL::Texture *getInputTexture() const;
 
 private:
+  Renderer(MTL::Device *device, CA::MetalLayer *layer);
+  ~Renderer();
+  Renderer(const Renderer &) = delete;
+  Renderer &operator=(const Renderer &) = delete;
+
+  static Renderer *_instance;
+
   MTL::Device *_device;
   CA::MetalLayer *_layer;
   MTL::CommandQueue *_commandQueue;

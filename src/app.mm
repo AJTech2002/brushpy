@@ -8,7 +8,6 @@
 
 static id<MTLDevice> gDevice;
 static CAMetalLayer *gLayer;
-static Renderer *gRenderer;
 static CADisplayLink *gDisplayLink;
 
 // Thin ObjC trampoline: CADisplayLink requires an ObjC target/selector.
@@ -17,7 +16,7 @@ static CADisplayLink *gDisplayLink;
 @end
 @implementation DisplayLinkTarget
 - (void)tick:(CADisplayLink *)link {
-  gRenderer->draw();
+  Renderer::instance().draw();
 }
 @end
 static DisplayLinkTarget *gTarget;
@@ -41,7 +40,7 @@ void start(void *contentView) {
   // Cast ObjC pointers to metal-cpp C++ types (same pointer, different type).
   MTL::Device *device = (MTL::Device *)(__bridge void *)gDevice;
   CA::MetalLayer *layer = (CA::MetalLayer *)(__bridge void *)gLayer;
-  gRenderer = new Renderer(device, layer);
+  Renderer::init(device, layer);
 
   gTarget = [[DisplayLinkTarget alloc] init];
   gDisplayLink = [[NSScreen mainScreen] displayLinkWithTarget:gTarget
@@ -54,6 +53,5 @@ void stop(void) {
   [gDisplayLink invalidate];
   gDisplayLink = nil;
   gTarget = nil;
-  delete gRenderer;
-  gRenderer = nullptr;
+  Renderer::destroy();
 }
