@@ -8,7 +8,6 @@ class Texture;
 };
 
 class Canvas;
-class BTexture;
 
 /*
   Layer is a simple primitive that represents a layer in the canvas. It can be

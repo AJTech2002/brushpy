@@ -1,4 +1,5 @@
 #include "primitive.h"
+#include "renderer.h"
 
 Primitive::Primitive() {}
 
@@ -13,6 +14,7 @@ void Primitive::init(int width, int height) {
   _width = width;
   _height = height;
   _isDirty = true;
+  _texture = Renderer::createTexture(width, height);
 }
 
 void Primitive::render(MTL::Texture *inputTexture, MTL::Texture *outputTexture,

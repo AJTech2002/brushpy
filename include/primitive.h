@@ -5,7 +5,6 @@ namespace MTL {
 class Texture;
 };
 class Canvas;
-class BTexture;
 
 /*
   Primitive is an abstract base class for all drawable objects in the canvas. It
@@ -24,7 +23,7 @@ public:
     return "return float4(CUR, COL, COL.a);";
   }
   virtual bool isDirty() const { return _isDirty; }
-  BTexture *texture() const { return _texture; }
+  MTL::Texture *texture() const { return _texture; }
   virtual void render(MTL::Texture *inputTexture, MTL::Texture *outputTexture,
                       glm::vec2 position, glm::vec2 region) = 0;
 
@@ -32,7 +31,7 @@ protected:
   int _width = 0;
   int _height = 0;
   std::string _blendFn;
-  BTexture *_texture;
+  MTL::Texture *_texture;
   bool _isDirty = true;
 };
 

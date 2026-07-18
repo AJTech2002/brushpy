@@ -19,18 +19,24 @@ void Canvas::init(const Renderer *renderer) {
 }
 
 void Canvas::draw(const Renderer *renderer) {
-  for (Layer *layer : _layers) {
+  // for (Layer *layer : _layers) {
+  //   layer->draw(this, glm::vec2(0.0f, 0.0f), glm::vec2(_width, _height));
+  // }
+
+  // Loop through Layers backwards and composite them onto the output texture
+  for (int i = _layers.size() - 1; i >= 0; i--) {
+    Layer *layer = _layers[i];
     layer->draw(this, glm::vec2(0.0f, 0.0f), glm::vec2(_width, _height));
+
+    compositor.setParams({
+        .src = layer->texture(),
+        .dst = renderer->outputTexture(),
+        .start = glm::ivec2(128, 0),
+        .end = glm::ivec2(128 + 60, 0 + 280),
+    });
+
+    compositor.run();
   }
-
-  compositor.setParams({
-      .src = renderer->outputTexture(),
-      .dst = renderer->outputTexture(),
-      .start = glm::ivec2(0, 0),
-      .end = glm::ivec2(_width, _height / 2),
-  });
-
-  compositor.run();
 }
 
 void Canvas::dispose() {

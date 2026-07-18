@@ -28,6 +28,18 @@ void Renderer::create(MTL::Device *device, CA::MetalLayer *layer) {
   _instance = new Renderer(device, layer);
 }
 
+MTL::Texture *Renderer::createTexture(int width, int height) {
+  MTL::TextureDescriptor *desc = MTL::TextureDescriptor::alloc()->init();
+  desc->setTextureType(MTL::TextureType2D);
+  desc->setPixelFormat(MTL::PixelFormatRGBA32Float);
+  desc->setWidth(width);
+  desc->setHeight(height);
+  desc->setStorageMode(MTL::StorageModeShared);
+  MTL::Texture *texture = instance()._device->newTexture(desc);
+  desc->release();
+  return texture;
+}
+
 Renderer::Renderer(MTL::Device *device, CA::MetalLayer *layer)
     : _device(device), _layer(layer) {
   _commandQueue = _device->newCommandQueue();
@@ -36,16 +48,7 @@ Renderer::Renderer(MTL::Device *device, CA::MetalLayer *layer)
   _defaultLibrary = _device->newDefaultLibrary();
   createRenderPipeline();
 
-  MTL::TextureDescriptor *textureDescriptor =
-      MTL::TextureDescriptor::alloc()->init();
-  textureDescriptor->setTextureType(MTL::TextureType2D);
-  textureDescriptor->setPixelFormat(MTL::PixelFormatRGBA32Float);
-  textureDescriptor->setWidth(WIDTH);
-  textureDescriptor->setHeight(HEIGHT);
-
-  textureDescriptor->setStorageMode(MTL::StorageModeShared);
-
-  _outputTexture = _device->newTexture(textureDescriptor);
+  _outputTexture = createTexture(WIDTH, HEIGHT);
 
   std::cout << "BrushPY Renderer ready, created Quad Buffer & Default Library"
             << std::endl;

@@ -37,6 +37,8 @@ public:
 
   static MTL::Texture *outputTexture() { return instance()._outputTexture; }
 
+  static MTL::Texture *createTexture(int width, int height);
+
 private:
   Renderer(MTL::Device *device, CA::MetalLayer *layer);
   ~Renderer();

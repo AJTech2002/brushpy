@@ -45,5 +45,5 @@ kernel void compositeCompute(texture2d<float, access::write> outTexture
               float2(outTexture.get_width(), outTexture.get_height());
 
   float4 color = float4(uv.x, uv.y, 0.0, 1.0);
-  outTexture.write(color, gid);
+  outTexture.write(color, absolute_gid);
 }
