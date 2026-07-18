@@ -27,17 +27,23 @@ fragment float4 fragmentShader(VertexOut in [[stage_in]],
   //   return float4(in.uv, 0.0, 1.0);
 }
 
-kernel void computeShader(texture2d<float, access::write> outTexture
-                          [[texture(0)]],
-                          texture2d<float, access::read> inTexture
-                          [[texture(1)]],
-                          uint2 gid [[thread_position_in_grid]]) {
-  if (gid.x >= outTexture.get_width() || gid.y >= outTexture.get_height()) {
+kernel void compositeCompute(texture2d<float, access::write> outTexture
+                             [[texture(0)]],
+                             texture2d<float, access::read> inTexture
+                             [[texture(1)]],
+                             constant int2 &start [[buffer(0)]],
+                             constant int2 &end [[buffer(1)]],
+                             uint2 gid [[thread_position_in_grid]]) {
+
+  uint2 absolute_gid = gid + uint2(start);
+  if (absolute_gid.x >= outTexture.get_width() ||
+      absolute_gid.y >= outTexture.get_height()) {
     return;
   }
 
-  float2 uv =
-      float2(gid) / float2(outTexture.get_width(), outTexture.get_height());
+  float2 uv = float2(absolute_gid) /
+              float2(outTexture.get_width(), outTexture.get_height());
+
   float4 color = float4(uv.x, uv.y, 0.0, 1.0);
   outTexture.write(color, gid);
 }

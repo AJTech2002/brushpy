@@ -16,25 +16,26 @@ namespace CA {
 class MetalLayer;
 }
 
+class Canvas;
+
 class Renderer {
 public:
   static Renderer &instance();
-  static void init(MTL::Device *device, CA::MetalLayer *layer);
+  static void create(MTL::Device *device, CA::MetalLayer *layer);
   static void destroy();
 
   void draw();
+  void init();
 
   static MTL::CommandBuffer *activeCommandBuffer() {
     return instance()._activeCommandBuffer;
   }
 
-  static MTL::Library *getDefaultLibrary() {
-    return instance()._defaultLibrary;
-  }
+  static MTL::Library *defaultLibrary() { return instance()._defaultLibrary; }
 
-  static MTL::Device *getDevice() { return instance()._device; }
+  static MTL::Device *device() { return instance()._device; }
 
-  static MTL::Texture *getOutputTexture() { return instance().outputTexture; }
+  static MTL::Texture *outputTexture() { return instance()._outputTexture; }
 
 private:
   Renderer(MTL::Device *device, CA::MetalLayer *layer);
@@ -52,7 +53,9 @@ private:
   MTL::Library *_defaultLibrary;
   MTL::RenderPipelineState *_metalRenderPSO;
 
-  MTL::Texture *outputTexture;
+  MTL::Texture *_outputTexture;
+
+  Canvas *_canvas;
 
   void createRenderPipeline();
   void encodeRenderCommands(MTL::RenderCommandEncoder *renderCommandEncoder);

@@ -3,6 +3,7 @@
 #define MTL_PRIVATE_IMPLEMENTATION
 #include "renderer.h"
 #include "app.h"
+#include "canvas.h"
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
 #include <QuartzCore/QuartzCore.hpp>
@@ -16,15 +17,15 @@ simd::float3 quadVertices[] = {{-1.0f, -1.0f, 0.0f}, {1.0f, -1.0f, 0.0f},
 
 Renderer *Renderer::_instance = nullptr;
 
-Renderer &Renderer::instance() { return *_instance; }
-
-void Renderer::init(MTL::Device *device, CA::MetalLayer *layer) {
-  _instance = new Renderer(device, layer);
+Renderer &Renderer::instance() {
+  assert(_instance != nullptr &&
+         "Renderer::init() must be called before instance()");
+  return *_instance;
 }
 
-void Renderer::destroy() {
-  delete _instance;
-  _instance = nullptr;
+void Renderer::create(MTL::Device *device, CA::MetalLayer *layer) {
+
+  _instance = new Renderer(device, layer);
 }
 
 Renderer::Renderer(MTL::Device *device, CA::MetalLayer *layer)
@@ -44,13 +45,16 @@ Renderer::Renderer(MTL::Device *device, CA::MetalLayer *layer)
 
   textureDescriptor->setStorageMode(MTL::StorageModeShared);
 
-  outputTexture = _device->newTexture(textureDescriptor);
+  _outputTexture = _device->newTexture(textureDescriptor);
 
   std::cout << "BrushPY Renderer ready, created Quad Buffer & Default Library"
             << std::endl;
 }
 
-Renderer::~Renderer() { _commandQueue->release(); }
+void Renderer::init() {
+  _canvas = new Canvas(WIDTH, HEIGHT);
+  _canvas->init(this);
+}
 
 void Renderer::createRenderPipeline() {
   // This automatically finds the vertex function in any metal files
@@ -89,7 +93,7 @@ void Renderer::encodeRenderCommands(
   NS::UInteger vertexStart = 0;
   NS::UInteger vertexCount = sizeof(quadVertices) / sizeof(simd::float3);
 
-  renderCommandEncoder->setFragmentTexture(outputTexture, 0);
+  renderCommandEncoder->setFragmentTexture(_outputTexture, 0);
   renderCommandEncoder->drawPrimitives(type, vertexStart, vertexCount);
 }
 
@@ -107,13 +111,25 @@ void Renderer::draw() {
   color->setClearColor(MTL::ClearColor(0.0, 0.0, 1.0, 1.0));
   color->setStoreAction(MTL::StoreActionStore);
 
-  MTL::CommandBuffer *cmd = _commandQueue->commandBuffer();
+  _activeCommandBuffer = _commandQueue->commandBuffer();
 
-  MTL::RenderCommandEncoder *enc = cmd->renderCommandEncoder(descriptor);
+  _canvas->draw(this);
+
+  MTL::RenderCommandEncoder *enc =
+      _activeCommandBuffer->renderCommandEncoder(descriptor);
   encodeRenderCommands(enc);
   enc->endEncoding();
 
-  cmd->presentDrawable(drawable);
-  cmd->commit();
-  cmd->waitUntilCompleted();
+  _activeCommandBuffer->presentDrawable(drawable);
+  _activeCommandBuffer->commit();
+  _activeCommandBuffer->waitUntilCompleted();
+  _activeCommandBuffer = nullptr;
+}
+
+Renderer::~Renderer() { _commandQueue->release(); }
+
+void Renderer::destroy() {
+  _instance->_canvas->dispose();
+  delete _instance;
+  _instance = nullptr;
 }

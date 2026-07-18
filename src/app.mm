@@ -40,7 +40,8 @@ void start(void *contentView) {
   // Cast ObjC pointers to metal-cpp C++ types (same pointer, different type).
   MTL::Device *device = (MTL::Device *)(__bridge void *)gDevice;
   CA::MetalLayer *layer = (CA::MetalLayer *)(__bridge void *)gLayer;
-  Renderer::init(device, layer);
+  Renderer::create(device, layer);
+  Renderer::instance().init();
 
   gTarget = [[DisplayLinkTarget alloc] init];
   gDisplayLink = [[NSScreen mainScreen] displayLinkWithTarget:gTarget

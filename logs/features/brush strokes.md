@@ -1,0 +1,1 @@
+- how can I do a brush stroke in realtime for the latest one

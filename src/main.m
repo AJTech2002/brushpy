@@ -34,7 +34,10 @@ int main() {
                     backing:NSBackingStoreBuffered
                       defer:NO];
     [window setTitle:@"BrushPY"];
-    [window center];
+    [window setFrameAutosaveName:@"BrushPYMainWindow"];
+    if (![[NSUserDefaults standardUserDefaults] objectForKey:@"NSWindow Frame BrushPYMainWindow"]) {
+        [window center];
+    }
     [window makeKeyAndOrderFront:nil];
 
     start((__bridge void*)window.contentView);
