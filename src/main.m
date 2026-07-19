@@ -35,7 +35,7 @@ int main() {
                     backing:NSBackingStoreBuffered
                       defer:NO];
     [window setTitle:@"BrushPY"];
-    [window setFrameAutosaveName:@"BrushPYMainWindow"];
+    // [window setFrameAutosaveName:@"BrushPYMainWindow"];
     if (![[NSUserDefaults standardUserDefaults] objectForKey:@"NSWindow Frame BrushPYMainWindow"]) {
         [window center];
     }

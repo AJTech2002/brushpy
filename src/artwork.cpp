@@ -20,6 +20,8 @@ void artwork1() {
 
     Square *square =
         new Square(glm::vec2(100, 100), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    Circle *circle =
+        new Circle(glm::vec2(30, 30), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
     // TODO: This has to be done within a draw call
 
     glm::mat4x4 transform = glm::mat4x4(1.0f);
@@ -36,6 +38,7 @@ void artwork1() {
     // transform = glm::rotate(transform, glm::radians(30.0f), glm::vec3(0, 0,
     // 1));
     layer->add(square, transform);
+    layer->add(circle, transform);
   };
   Renderer::addDrawCallback(callbck);
 }
