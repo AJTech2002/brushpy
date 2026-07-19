@@ -13,26 +13,28 @@ class Compute {
 
 public:
   void init(const char *shaderName);
-  void run();
   void setDispatchProperties(int w, int h, int tW, int tH) {
     this->width = w;
     this->height = h;
     this->threadGroupWidth = tW;
     this->threadGroupHeight = tH;
   }
-
-protected:
-  MTL::ComputePipelineState *_metalComputePSO;
-  MTL::ComputeCommandEncoder *computeEncoder;
-  int width;
-  int height;
-  int threadGroupWidth;
-  int threadGroupHeight;
-
   virtual void setup();
   virtual void bind();
   virtual void dispatch(int width, int height, int threadGroupWidth,
                         int threadGroupHeight);
+  const MTL::ComputePipelineState *metalComputePSO() const {
+    return _metalComputePSO;
+  }
+  MTL::ComputeCommandEncoder *computeEncoder() const { return _computeEncoder; }
+
+protected:
+  MTL::ComputePipelineState *_metalComputePSO;
+  MTL::ComputeCommandEncoder *_computeEncoder;
+  int width;
+  int height;
+  int threadGroupWidth;
+  int threadGroupHeight;
 };
 
 typedef struct {
@@ -46,8 +48,14 @@ class CompositeCompute : public Compute {
 
 public:
   CompositeCompute() : Compute() {}
-  void setParams(const CompositeComputeParams params) { this->params = params; }
   void init() { Compute::init("compositeCompute"); }
+  void run(CompositeComputeParams params) {
+    this->params = params;
+    setup();
+    bind();
+    dispatch(params.end.x - params.start.x, params.end.y - params.start.y, 8,
+             8);
+  }
 
 protected:
   void bind() override;

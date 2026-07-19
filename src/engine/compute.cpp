@@ -9,7 +9,7 @@
 
 void Compute::init(const char *shaderName) {
   MTL::Function *computeShader = Renderer::defaultLibrary()->newFunction(
-      NS::String::string("compositeCompute", NS::ASCIIStringEncoding));
+      NS::String::string(shaderName, NS::ASCIIStringEncoding));
 
   MTL::ComputePipelineDescriptor *computePipelineDescriptor =
       MTL::ComputePipelineDescriptor::alloc()->init();
@@ -28,8 +28,8 @@ void Compute::setup() {
            "setup()");
     return;
   }
-  computeEncoder = Renderer::activeCommandBuffer()->computeCommandEncoder();
-  computeEncoder->setComputePipelineState(_metalComputePSO);
+  _computeEncoder = Renderer::activeCommandBuffer()->computeCommandEncoder();
+  _computeEncoder->setComputePipelineState(_metalComputePSO);
 }
 
 void Compute::bind() { return; }
@@ -38,33 +38,27 @@ void Compute::dispatch(int width, int height, int threadGroupWidth,
                        int threadGroupHeight) {
   MTL::Size gridSize = MTL::Size(width, height, 1);
   MTL::Size threadGroupSize = MTL::Size(threadGroupWidth, threadGroupHeight, 1);
-  computeEncoder->dispatchThreads(gridSize, threadGroupSize);
-  computeEncoder->endEncoding();
-}
-
-void Compute::run() {
-  setup();
-  bind();
-  dispatch(width, height, threadGroupWidth, threadGroupHeight);
+  _computeEncoder->dispatchThreads(gridSize, threadGroupSize);
+  _computeEncoder->endEncoding();
 }
 
 // - Compositor Implementation -
 // TODO: Move this to a new file
 void CompositeCompute::bind() {
 
-  if (computeEncoder == nullptr) {
+  if (_computeEncoder == nullptr) {
     assert("Compute encoder is null. Call setup() before bind()");
     return;
   }
 
-  computeEncoder->setTexture(params.dst, 0);
-  computeEncoder->setTexture(params.src, 1);
+  _computeEncoder->setTexture(params.dst, 0);
+  _computeEncoder->setTexture(params.src, 1);
 
   glm::ivec2 start = params.start;
   glm::ivec2 end = params.end;
 
-  computeEncoder->setBytes(&start, sizeof(glm::ivec2), 0);
-  computeEncoder->setBytes(&end, sizeof(glm::ivec2), 1);
+  _computeEncoder->setBytes(&start, sizeof(glm::ivec2), 0);
+  _computeEncoder->setBytes(&end, sizeof(glm::ivec2), 1);
 
   // TODO: Make thread group size configurable
   setDispatchProperties(end.x - start.x, end.y - start.y, 16, 16);

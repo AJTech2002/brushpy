@@ -1,5 +1,6 @@
 #import <Cocoa/Cocoa.h>
 #include "app.h"
+#include "artwork.h"
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 @end
@@ -41,6 +42,7 @@ int main() {
     [window makeKeyAndOrderFront:nil];
 
     start((__bridge void*)window.contentView);
+    artwork1();
 
     [NSApp activateIgnoringOtherApps:YES];
     [NSApp run];

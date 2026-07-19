@@ -1,41 +1,34 @@
 #pragma once
 #include "glm/ext/matrix_float4x4.hpp"
+#include "glm/ext/vector_float2.hpp"
+#include "renderer.h"
 
 namespace MTL {
 class Texture;
 };
-class Canvas;
 
 /*
-  Primitive is an abstract base class for all drawable objects in the canvas. It
-  defines the interface for width, height, and blend function. The blend
-  function can be overridden by derived classes to specify how the primitive
-  should be blended with the background.
+  Primitive is an abstract base class for all drawable objects in the canvas.
+  It represents a renderable that can paint itself into a given region of an
+  output texture. Size and texture storage belong to the Layer.
 */
 class Primitive {
 public:
   virtual ~Primitive();
-  Primitive();
-  virtual int width() const { return _width; }
-  virtual int height() const { return _height; }
-  virtual void init(int width, int height) = 0;
+
+  Primitive() {
+    if (Renderer::isReady() == false) {
+      assert("Renderer::init() must be called before creating a Primitive");
+    }
+
+    init();
+  }
+
   virtual std::string blendFn() const {
     return "return float4(CUR, COL, COL.a);";
   }
-  virtual bool isDirty() const { return _isDirty; }
-  MTL::Texture *texture() const { return _texture; }
-  virtual void render(MTL::Texture *inputTexture, MTL::Texture *outputTexture,
-                      glm::vec2 position, glm::vec2 region) = 0;
-
-protected:
-  int _width = 0;
-  int _height = 0;
-  std::string _blendFn;
-  MTL::Texture *_texture;
-  bool _isDirty = true;
-};
-
-struct PrimitiveInstance {
-  glm::mat4x4 transform; // Use to calculate bounds
-  bool isVisible;        // Use to determine if the primitive should be rendered
+  virtual void init();
+  virtual void render(MTL::Texture *outputTexture, glm::mat4 transform,
+                      glm::vec2 start, glm::vec2 end) = 0;
+  
 };

@@ -10,22 +10,25 @@ class Texture;
 class Canvas;
 
 /*
-  Layer is a simple primitive that represents a layer in the canvas. It can be
-  used to group other primitives together and apply transformations to them.
-  Limitation is that the texture is always the same size as the canvas.
+  Layer owns its output texture (always canvas-sized) and composites
+  all of its primitives into it each frame.
 */
-class Layer : public Primitive {
+class Layer {
 public:
   Layer();
   ~Layer();
   void init(Canvas *canvas);
-  void draw(Canvas *canvas, glm::vec2 position, glm::vec2 region);
+  // void draw(Canvas *canvas, glm::vec2 position, glm::vec2 region);
   void dispose();
-  void add(Primitive *primitive);
-  void remove(Primitive *primitive);
-  void setVisible(Primitive *primitive, bool isVisible);
+  void add(Primitive *primitive, glm::mat4x4 transformPx = glm::mat4x4(1.0f),
+           glm::vec2 sizePx = glm::vec2(0.0f, 0.0f));
+
+  int width() const { return _width; }
+  int height() const { return _height; }
+  MTL::Texture *texture() const { return _texture; }
 
 private:
-  std::unordered_map<Primitive *, PrimitiveInstance> _instances;
-  std::vector<Primitive *> _primitives;
+  int _width = 0;
+  int _height = 0;
+  MTL::Texture *_texture = nullptr;
 };

@@ -1,5 +1,6 @@
 #include "app.h"
 #include "Renderer.h"
+#include "artwork.h"
 #import <AppKit/NSScreen.h>
 #import <Cocoa/Cocoa.h>
 #import <Metal/Metal.h>

@@ -18,6 +18,11 @@ void Canvas::init(const Renderer *renderer) {
   }
 }
 
+void Canvas::addLayer(Layer *layer) {
+  _layers.push_back(layer);
+  layer->init(this);
+}
+
 void Canvas::draw(const Renderer *renderer) {
   // for (Layer *layer : _layers) {
   //   layer->draw(this, glm::vec2(0.0f, 0.0f), glm::vec2(_width, _height));
@@ -26,16 +31,15 @@ void Canvas::draw(const Renderer *renderer) {
   // Loop through Layers backwards and composite them onto the output texture
   for (int i = _layers.size() - 1; i >= 0; i--) {
     Layer *layer = _layers[i];
-    layer->draw(this, glm::vec2(0.0f, 0.0f), glm::vec2(_width, _height));
 
-    compositor.setParams({
+    // TODO: Optimize this by only running the compositor if the layer is dirty
+    // and within dirty regions
+    compositor.run({
         .src = layer->texture(),
         .dst = renderer->outputTexture(),
-        .start = glm::ivec2(128, 0),
-        .end = glm::ivec2(128 + 60, 0 + 280),
+        .start = glm::ivec2(0, 0),
+        .end = glm::ivec2(width(), height()),
     });
-
-    compositor.run();
   }
 }
 

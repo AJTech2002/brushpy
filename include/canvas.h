@@ -18,7 +18,7 @@ public:
   void init(const Renderer *renderer);
   void draw(const Renderer *renderer);
   void dispose();
-  void addLayer(Layer *layer) { _layers.push_back(layer); }
+  void addLayer(Layer *layer);
   int layerCount() const { return (int)_layers.size(); }
   int width() const { return _width; }
   int height() const { return _height; }

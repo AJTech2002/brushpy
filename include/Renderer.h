@@ -1,5 +1,9 @@
 #pragma once
 
+#include "string"
+#include <functional>
+#include <vector>
+
 namespace MTL {
 class Device;
 class CommandQueue;
@@ -37,7 +41,16 @@ public:
 
   static MTL::Texture *outputTexture() { return instance()._outputTexture; }
 
-  static MTL::Texture *createTexture(int width, int height);
+  static MTL::Texture *createTexture(int width, int height,
+                                     std::string label = "RendererTexture");
+
+  static Canvas *canvas() { return instance()._canvas; }
+
+  static bool isReady() { return ready; }
+
+  static void addDrawCallback(std::function<void(Renderer *)> callback) {
+    drawCallbacks.push_back(callback);
+  }
 
 private:
   Renderer(MTL::Device *device, CA::MetalLayer *layer);
@@ -57,7 +70,11 @@ private:
 
   MTL::Texture *_outputTexture;
 
+  // List of draw callbacks
+  static std::vector<std::function<void(Renderer *)>> drawCallbacks;
+
   Canvas *_canvas;
+  static bool ready;
 
   void createRenderPipeline();
   void encodeRenderCommands(MTL::RenderCommandEncoder *renderCommandEncoder);

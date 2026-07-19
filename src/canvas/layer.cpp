@@ -1,52 +1,38 @@
 #include "layer.h"
+#include "Metal/MTLTexture.hpp"
+#include "canvas.h"
+#include "glm/ext/matrix_float4x4.hpp"
+#include "glm/ext/vector_float2.hpp"
+#include "primitive.h"
+#include "renderer.h"
 
 Layer::Layer() {}
-Layer::~Layer() {}
 
-void Layer::init(Canvas *canvas) {}
-
-void Layer::add(Primitive *primitive) {
-  _primitives.push_back(primitive);
-  _instances[primitive] = PrimitiveInstance{glm::mat4(1.0f), true};
-}
-
-void Layer::setVisible(Primitive *primitive, bool isVisible) {
-  if (_instances.find(primitive) != _instances.end()) {
-    _instances[primitive].isVisible = isVisible;
+Layer::~Layer() {
+  if (_texture) {
+    _texture->release();
+    _texture = nullptr;
   }
 }
 
-void Layer::remove(Primitive *primitive) {
-  auto it = std::find(_primitives.begin(), _primitives.end(), primitive);
-  if (it != _primitives.end()) {
-    _primitives.erase(it);
-    _instances.erase(primitive);
-  }
+void Layer::init(Canvas *canvas) {
+  _width = canvas->width();
+  _height = canvas->height();
+  _texture = Renderer::createTexture(_width, _height, "LayerTexture");
 }
 
-void Layer::draw(Canvas *canvas, glm::vec2 position, glm::vec2 region) {
-  for (Primitive *primitive : _primitives) {
-    if (primitive == nullptr) {
-      remove(primitive);
-      continue;
-    }
-
-    PrimitiveInstance &instance = _instances[primitive];
-    if (instance.isVisible) {
-      if (primitive->isDirty()) {
-        primitive->render(nullptr, nullptr, position, region);
-      }
-
-      // TODO: Composite the primitive's texture onto the layer's texture using
-      // the instance's transform
-    }
+void Layer::add(Primitive *primitive, glm::mat4x4 transformPx,
+                glm::vec2 sizePx) {
+  glm::vec2 start = glm::vec2(0, 0);
+  glm::vec2 end = glm::vec2(_width, _height);
+  glm::mat4x4 inverseTransform = glm::inverse(transformPx);
+  if (sizePx.x > 0 && sizePx.y > 0) {
+    glm::vec2 center = inverseTransform * glm::vec4(0, 0, 0, 1);
+    start = glm::vec2(center.x - sizePx.x / 2, center.y - sizePx.y / 2);
+    end = glm::vec2(center.x + sizePx.x / 2, center.y + sizePx.y / 2);
   }
+
+  primitive->render(_texture, inverseTransform, start, end);
 }
 
-void Layer::dispose() {
-  for (Primitive *primitive : _primitives) {
-    delete primitive;
-  }
-  _primitives.clear();
-  _instances.clear();
-}
+void Layer::dispose() {}

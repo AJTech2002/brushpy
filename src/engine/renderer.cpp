@@ -17,6 +17,9 @@ simd::float3 quadVertices[] = {{-1.0f, -1.0f, 0.0f}, {1.0f, -1.0f, 0.0f},
 
 Renderer *Renderer::_instance = nullptr;
 
+std::vector<std::function<void(Renderer *)>> Renderer::drawCallbacks;
+bool Renderer::ready = false;
+
 Renderer &Renderer::instance() {
   assert(_instance != nullptr &&
          "Renderer::init() must be called before instance()");
@@ -28,14 +31,20 @@ void Renderer::create(MTL::Device *device, CA::MetalLayer *layer) {
   _instance = new Renderer(device, layer);
 }
 
-MTL::Texture *Renderer::createTexture(int width, int height) {
+MTL::Texture *Renderer::createTexture(int width, int height,
+                                      std::string label) {
   MTL::TextureDescriptor *desc = MTL::TextureDescriptor::alloc()->init();
   desc->setTextureType(MTL::TextureType2D);
   desc->setPixelFormat(MTL::PixelFormatRGBA32Float);
   desc->setWidth(width);
   desc->setHeight(height);
   desc->setStorageMode(MTL::StorageModeShared);
+  desc->setUsage(MTL::TextureUsageRenderTarget | MTL::TextureUsageShaderRead |
+                 MTL::TextureUsageShaderWrite);
+
   MTL::Texture *texture = instance()._device->newTexture(desc);
+  texture->setLabel(NS::String::string(label.c_str(), NS::ASCIIStringEncoding));
+
   desc->release();
   return texture;
 }
@@ -48,15 +57,16 @@ Renderer::Renderer(MTL::Device *device, CA::MetalLayer *layer)
   _defaultLibrary = _device->newDefaultLibrary();
   createRenderPipeline();
 
-  _outputTexture = createTexture(WIDTH, HEIGHT);
-
   std::cout << "BrushPY Renderer ready, created Quad Buffer & Default Library"
             << std::endl;
 }
 
 void Renderer::init() {
+  _outputTexture = createTexture(WIDTH, HEIGHT);
+
   _canvas = new Canvas(WIDTH, HEIGHT);
   _canvas->init(this);
+  ready = true;
 }
 
 void Renderer::createRenderPipeline() {
@@ -116,7 +126,13 @@ void Renderer::draw() {
 
   _activeCommandBuffer = _commandQueue->commandBuffer();
 
+  for (auto &callback : drawCallbacks) {
+    callback(this);
+  }
+
   _canvas->draw(this);
+
+  drawCallbacks.clear();
 
   MTL::RenderCommandEncoder *enc =
       _activeCommandBuffer->renderCommandEncoder(descriptor);
