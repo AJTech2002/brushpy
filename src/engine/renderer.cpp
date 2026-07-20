@@ -4,6 +4,8 @@
 #include "renderer.h"
 #include "app.h"
 #include "canvas.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
 #include <QuartzCore/QuartzCore.hpp>
@@ -46,6 +48,32 @@ MTL::Texture *Renderer::createTexture(int width, int height,
   texture->setLabel(NS::String::string(label.c_str(), NS::ASCIIStringEncoding));
 
   desc->release();
+  return texture;
+}
+
+MTL::Texture *Renderer::loadTexture(const char *imagePath, std::string label) {
+  int width, height, channels;
+  stbi_uc *pixels = stbi_load(imagePath, &width, &height, &channels,
+                              STBI_rgb_alpha); // force RGBA8
+  if (!pixels)
+    return nullptr;
+
+  MTL::TextureDescriptor *desc = MTL::TextureDescriptor::alloc()->init();
+  desc->setWidth(width);
+  desc->setHeight(height);
+  desc->setPixelFormat(MTL::PixelFormatRGBA8Unorm);
+  desc->setTextureType(MTL::TextureType2D);
+  desc->setStorageMode(MTL::StorageModeShared); // or Managed on macOS
+  desc->setUsage(MTL::TextureUsageShaderRead);
+
+  MTL::Texture *texture = instance()._device->newTexture(desc);
+  desc->release();
+
+  MTL::Region region = MTL::Region(0, 0, 0, width, height, 1);
+  NS::UInteger bytesPerRow = width * 4;
+  texture->replaceRegion(region, 0, pixels, bytesPerRow);
+
+  stbi_image_free(pixels);
   return texture;
 }
 

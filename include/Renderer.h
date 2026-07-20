@@ -44,6 +44,9 @@ public:
   static MTL::Texture *createTexture(int width, int height,
                                      std::string label = "RendererTexture");
 
+  static MTL::Texture *loadTexture(const char *imagePath,
+                                   std::string label = "RendererTexture");
+
   static Canvas *canvas() { return instance()._canvas; }
 
   static bool isReady() { return ready; }

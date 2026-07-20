@@ -4,7 +4,7 @@
         {
             "label": "RUN_IMMEDIATE",
             "type": "shell",
-            "command": "cd build && cmake .. && cd .. && cmake --build ./build && open ./bin/BrushPY.app",
+            "command": "pkill -x BrushPY; cd build && cmake .. && cd .. && cmake --build ./build && open ./bin/BrushPY.app",
             "group": {
                 "kind": "build",
                 "isDefault": true
