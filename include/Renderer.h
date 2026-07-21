@@ -24,6 +24,10 @@ class Canvas;
 
 class Renderer {
 public:
+  static inline const std::vector<std::string> shaderFiles = {
+      "base.metal",
+  };
+
   static Renderer &instance();
   static void create(MTL::Device *device, CA::MetalLayer *layer);
   static void destroy();
@@ -81,4 +85,9 @@ private:
 
   void createRenderPipeline();
   void encodeRenderCommands(MTL::RenderCommandEncoder *renderCommandEncoder);
+
+  // Compiles shaderFiles into a single Metal library at runtime, instead of
+  // relying on a default.metallib next to the executable (which doesn't
+  // exist when running embedded in the Python interpreter).
+  MTL::Library *compileShaderLibrary();
 };

@@ -3,8 +3,10 @@ This project is a library to create raster art through code, the first iteration
 
 # Dependencies
 
-- Metal
+- MacOS
 - GLM Header Files (`include/glm`)
+- Pybind11 Header Files (`include/pybind11`)
+- Python / PyBind (via brew)
 
 # Setup 
 
@@ -22,3 +24,10 @@ sh ./generate-xcode.sh
 ```
 
 Then open with the generated XCode Project File.
+
+
+# Run Artwork
+
+### Build & Run
+
+`pip install --no-build-isolation -e . && python ./test.py`

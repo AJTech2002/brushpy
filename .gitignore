@@ -7,3 +7,5 @@
 /logs/private
 /xcode-build
 /include/glm
+/include/pybind11
+/.venv

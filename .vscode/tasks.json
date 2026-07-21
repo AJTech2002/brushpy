@@ -2,12 +2,31 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "BUILD_PY",
+            "type": "shell",
+            "command": "pkill -x BrushPY; cd build && cmake .. && cd .. && cmake --build ./build && sh ./py-cmake-gen.sh",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
             "label": "RUN_IMMEDIATE",
             "type": "shell",
             "command": "pkill -x BrushPY; cd build && cmake .. && cd .. && cmake --build ./build && open ./bin/BrushPY.app",
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             },
             "options": {
                 "cwd": "${workspaceFolder}"

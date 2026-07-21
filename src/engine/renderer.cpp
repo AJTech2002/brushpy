@@ -9,8 +9,11 @@
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
 #include <QuartzCore/QuartzCore.hpp>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <simd/simd.h>
+#include <sstream>
 
 // Two triangles to make a quad
 simd::float3 quadVertices[] = {{-1.0f, -1.0f, 0.0f}, {1.0f, -1.0f, 0.0f},
@@ -82,18 +85,51 @@ Renderer::Renderer(MTL::Device *device, CA::MetalLayer *layer)
   _commandQueue = _device->newCommandQueue();
   _quadBuffer = _device->newBuffer(&quadVertices, sizeof(quadVertices),
                                    MTL::ResourceStorageModeShared);
-  _defaultLibrary = _device->newDefaultLibrary();
+  _defaultLibrary = compileShaderLibrary();
   createRenderPipeline();
 
-  std::cout << "BrushPY Renderer ready, created Quad Buffer & Default Library"
+  std::cout << "BrushPY Renderer ready, created Quad Buffer & Shader Library"
             << std::endl;
+}
+
+MTL::Library *Renderer::compileShaderLibrary() {
+  std::filesystem::path shaderDir =
+      std::filesystem::path(__FILE__).parent_path().parent_path() / "shaders";
+
+  std::string source;
+  for (const auto &file : shaderFiles) {
+    std::filesystem::path path = shaderDir / file;
+    std::ifstream in(path);
+    if (!in) {
+      std::cerr << "Renderer: failed to open shader file " << path << std::endl;
+      continue;
+    }
+    std::stringstream contents;
+    contents << in.rdbuf();
+    source += contents.str();
+    source += "\n";
+  }
+
+  NS::Error *error = nullptr;
+  MTL::Library *library = _device->newLibrary(
+      NS::String::string(source.c_str(), NS::UTF8StringEncoding), nullptr,
+      &error);
+
+  if (!library) {
+    std::cerr << "Renderer: failed to compile shader library: "
+              << (error ? error->localizedDescription()->utf8String()
+                        : "unknown error")
+              << std::endl;
+  }
+
+  return library;
 }
 
 void Renderer::init() {
   _outputTexture = createTexture(WIDTH, HEIGHT);
 
-  _canvas = new Canvas(WIDTH, HEIGHT);
-  _canvas->init(this);
+  // _canvas = new Canvas(WIDTH, HEIGHT);
+  // _canvas->init(this);
   ready = true;
 }
 

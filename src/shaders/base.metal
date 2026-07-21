@@ -39,7 +39,8 @@ kernel void compositeCompute(texture2d<float, access::write> outTexture
   uint2 absolute_gid = gid + uint2(start);
   if (absolute_gid.x >= outTexture.get_width() ||
       absolute_gid.y >= outTexture.get_height() || absolute_gid.x < start.x ||
-      absolute_gid.y < start.y) {
+      absolute_gid.y < start.y || absolute_gid.x > end.x ||
+      absolute_gid.y > end.y) {
     return;
   }
 
@@ -62,7 +63,8 @@ kernel void squareCompute(texture2d<float, access::read_write> outTexture
   uint2 absolute_gid = gid + uint2(start);
   if (absolute_gid.x >= outTexture.get_width() ||
       absolute_gid.y >= outTexture.get_height() || absolute_gid.x < start.x ||
-      absolute_gid.y < start.y) {
+      absolute_gid.y < start.y || absolute_gid.x > end.x ||
+      absolute_gid.y > end.y) {
     return;
   }
 
@@ -92,7 +94,8 @@ kernel void circleCompute(texture2d<float, access::read_write> outTexture
   uint2 absolute_gid = gid + uint2(start);
   if (absolute_gid.x >= outTexture.get_width() ||
       absolute_gid.y >= outTexture.get_height() || absolute_gid.x < start.x ||
-      absolute_gid.y < start.y) {
+      absolute_gid.y < start.y || absolute_gid.x > end.x ||
+      absolute_gid.y > end.y) {
     return;
   }
 
@@ -118,40 +121,16 @@ kernel void imageCompute(texture2d<float, access::read_write> outTexture
                          texture2d<float> inTexture [[texture(1)]],
                          constant float2 &size [[buffer(3)]],
                          uint2 gid [[thread_position_in_grid]]) {
-  // uint2 absolute_gid = gid + uint2(start);
-  // if (absolute_gid.x >= outTexture.get_width() ||
-  //     absolute_gid.y >= outTexture.get_height() || absolute_gid.x < start.x
-  //     || absolute_gid.y < start.y) {
-  //   return;
-  // }
-
-  // float2 pos = float2(absolute_gid);
-  // float4 transformedPos = transform * float4(pos, 0.0, 1.0);
-
-  // float2 center = size * 0.5;
-
-  // float2 imageUV = (transformedPos.xy - center) / size + 0.5;
-
-  // if (imageUV.x >= 0.0 && imageUV.x <= 1.0 && imageUV.y >= 0.0 &&
-  //     imageUV.y <= 1.0) {
-  //   constexpr sampler s(filter::linear, address::clamp_to_edge);
-  //   float4 color = inTexture.sample(s, imageUV);
-
-  //   float4 currentColor = outTexture.read(absolute_gid);
-  //   float4 blendedColor = mix(currentColor, color, color.a);
-
-  //   outTexture.write(blendedColor, absolute_gid);
-  // }
-
   uint2 absolute_gid = gid + uint2(start);
   if (absolute_gid.x >= outTexture.get_width() ||
       absolute_gid.y >= outTexture.get_height() || absolute_gid.x < start.x ||
-      absolute_gid.y < start.y) {
+      absolute_gid.y < start.y || absolute_gid.x > end.x ||
+      absolute_gid.y > end.y) {
     return;
   }
 
   float2 pos = float2(absolute_gid);
-
+ 
   // Apply the transform to the position
   float4 transformedPos = transform * float4(pos, 0.0, 1.0);
 

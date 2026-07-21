@@ -28,6 +28,10 @@ if(CMAKE_GENERATOR STREQUAL "Xcode")
     target_sources(BrushPY PRIVATE ${SHADER_FILES})
 endif()
 
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+find_package(pybind11 REQUIRED)
+pybind11_add_module(bpy src/bindings.cpp ${SOURCE_FILES} ${HEADER_FILES})
+
 target_link_libraries(BrushPY
     "-framework Foundation"
     "-framework AppKit"
@@ -36,7 +40,20 @@ target_link_libraries(BrushPY
     "-framework QuartzCore"
     "-framework Metal"
     "-framework CoreVideo"
+    pybind11::embed
 )
+
+target_link_libraries(bpy PRIVATE
+    "-framework Foundation"
+    "-framework AppKit"
+    "-framework CoreGraphics"
+    "-framework CoreImage"
+    "-framework QuartzCore"
+    "-framework Metal"
+    "-framework CoreVideo"
+)
+
+install(TARGETS bpy LIBRARY DESTINATION .)
 
 # Compile Metal shaders for non-Xcode builds (Xcode handles this automatically)
 # https://developer.apple.com/documentation/metal/compiling-and-linking-metal-dynamic-libraries
