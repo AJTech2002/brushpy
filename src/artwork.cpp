@@ -12,7 +12,7 @@
 void artwork1() {
   auto callbck = [](Renderer *renderer) {
     std::cout << "~~ Running Artwork 1 ~~" << std::endl;
-    Canvas *canvas = Renderer::canvas();
+    Canvas *canvas = new Canvas();
 
     Layer *layer = new Layer();
 

@@ -11,12 +11,13 @@ class ComputePipelineState;
 class Canvas {
 
 public:
-  Canvas(int width, int height);
+  Canvas();
   ~Canvas();
   std::vector<Layer *> layers() const { return _layers; }
   Layer *layer(const int index) const { return _layers[index]; }
   void init(const Renderer *renderer);
   void draw(const Renderer *renderer);
+  void render();
   void dispose();
   void addLayer(Layer *layer);
   int layerCount() const { return (int)_layers.size(); }

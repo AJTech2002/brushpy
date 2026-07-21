@@ -4,19 +4,32 @@
 #include "layer.h"
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
+#include <iostream>
 
 CompositeCompute compositor = CompositeCompute();
 
-Canvas::Canvas(int width, int height) : _width(width), _height(height) {}
+Canvas::Canvas() {
+  _width = 0;
+  _height = 0;
+}
 
 Canvas::~Canvas() {}
 
 void Canvas::init(const Renderer *renderer) {
+  _width = renderer->width();
+  _height = renderer->height();
   compositor.init();
   for (Layer *layer : _layers) {
     layer->init(this);
   }
 }
+
+void Canvas::render() {
+  Renderer::addDrawCallback([this](const Renderer *renderer) {
+    std::cout << "Canvas::render() called, drawing canvas" << std::endl;
+    this->draw(renderer);
+  });
+};
 
 void Canvas::addLayer(Layer *layer) {
   _layers.push_back(layer);

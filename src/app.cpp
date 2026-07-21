@@ -15,11 +15,11 @@ void start(void *metalLayer, int width, int height) {
   gLayer->setPixelFormat(MTL::PixelFormatBGRA8Unorm);
   gLayer->setDrawableSize(CGSizeMake(width, height));
 
-  std::printf("Metal ready: %s (%dx%d)\n", device->name()->utf8String(),
-              width, height);
+  std::printf("Metal ready: %s (%dx%d)\n", device->name()->utf8String(), width,
+              height);
 
   Renderer::create(device, gLayer);
-  Renderer::instance().init();
+  Renderer::instance().init(width, height);
 }
 
 void stop(void) { Renderer::destroy(); }

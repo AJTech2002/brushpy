@@ -44,13 +44,13 @@ static id gDisplayLinkTarget;
 }
 @end
 
-int start_brushpy() {
+int start_brushpy(int width, int height) {
   [NSApplication sharedApplication];
   [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
   [NSApp setDelegate:[[AppDelegate alloc] init]];
 
   NSWindow *window = [[NSWindow alloc]
-      initWithContentRect:NSMakeRect(0, 0, WIDTH, HEIGHT)
+      initWithContentRect:NSMakeRect(0, 0, width, height)
                 styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable |
                           NSWindowStyleMaskResizable
                   backing:NSBackingStoreBuffered

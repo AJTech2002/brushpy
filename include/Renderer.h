@@ -33,7 +33,10 @@ public:
   static void destroy();
 
   void draw();
-  void init();
+  void init(int width, int height);
+
+  static int width() { return instance()._width; }
+  static int height() { return instance()._height; }
 
   static MTL::CommandBuffer *activeCommandBuffer() {
     return instance()._activeCommandBuffer;
@@ -50,8 +53,6 @@ public:
 
   static MTL::Texture *loadTexture(const char *imagePath,
                                    std::string label = "RendererTexture");
-
-  static Canvas *canvas() { return instance()._canvas; }
 
   static bool isReady() { return ready; }
 
@@ -80,8 +81,9 @@ private:
   // List of draw callbacks
   static std::vector<std::function<void(Renderer *)>> drawCallbacks;
 
-  Canvas *_canvas;
   static bool ready;
+  int _width;
+  int _height;
 
   void createRenderPipeline();
   void encodeRenderCommands(MTL::RenderCommandEncoder *renderCommandEncoder);

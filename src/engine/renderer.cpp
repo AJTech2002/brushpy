@@ -125,9 +125,10 @@ MTL::Library *Renderer::compileShaderLibrary() {
   return library;
 }
 
-void Renderer::init() {
-  _outputTexture = createTexture(WIDTH, HEIGHT);
-
+void Renderer::init(int width, int height) {
+  _outputTexture = createTexture(width, height);
+  this->_width = width;
+  this->_height = height;
   // _canvas = new Canvas(WIDTH, HEIGHT);
   // _canvas->init(this);
   ready = true;
@@ -194,8 +195,6 @@ void Renderer::draw() {
     callback(this);
   }
 
-  _canvas->draw(this);
-
   drawCallbacks.clear();
 
   MTL::RenderCommandEncoder *enc =
@@ -212,7 +211,7 @@ void Renderer::draw() {
 Renderer::~Renderer() { _commandQueue->release(); }
 
 void Renderer::destroy() {
-  _instance->_canvas->dispose();
+  // _instance->_canvas->dispose();
   delete _instance;
   _instance = nullptr;
 }
