@@ -16,3 +16,5 @@ Tiling will be internally done in the `StrokePrimitive` - and actually the tilin
 Given the style of programming is now immediate mode, you don't need the iPad app to actually write any code. 
 
 The ideal workflow is that you plug into the mac via iPad and keep the iPad as simply a mirror / viewer of the current session and so the processing of the stroke etc. can all be done on the Mac - this is important, eg. checkout this example [[../private/what sets this apart from others|what sets this apart from others]] this would indicate that you can pass tensorflow outputs into the brush and if the iPad was separate either you run tensorflow on the ipad or you transmit the results each of which have a litany of problems.
+
+If a **brush stroke** is taking a long time, we show a progress bar and show it getting filled out over time and allow the user to start on the next brush stroke, it should never lag or feel like it's waiting... you are working alongside the technology 
