@@ -52,6 +52,7 @@ PYBIND11_MODULE(bpy, m) {
                [](int width, int height) { return new Canvas(width, height); }),
            pybind11::arg("width"), pybind11::arg("height"))
       .def("render", &Canvas::render)
+      .def("renderOut", &Canvas::renderOut, pybind11::arg("path"))
       //   .def("draw", &Canvas::draw)
       .def("addLayer", &Canvas::add)
       //   .def("layerCount", &Canvas::layerCount)

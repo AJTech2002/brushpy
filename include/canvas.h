@@ -1,6 +1,7 @@
 #pragma once
 #include "layer.h"
 #include "vector"
+#include <string>
 
 class Layer;
 
@@ -24,6 +25,11 @@ public:
   void init();
   void draw();
   void render();
+  // Draws the canvas and writes the composited output to a PNG at `path`,
+  // without blocking the calling thread: the GPU work is committed
+  // immediately and the pixel readback + file write happen later, on Metal's
+  // completion-handler thread, once the GPU is done.
+  void renderOut(const std::string &path);
   void dispose();
   void add(Layer *layer);
   Layer *newLayer() {
