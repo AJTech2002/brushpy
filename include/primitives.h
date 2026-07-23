@@ -1,8 +1,11 @@
 #pragma once
-#include "Metal/MTLComputeCommandEncoder.hpp"
 #include "compute_primitive.h"
+#include "engine.h"
 #include "glm/ext/vector_float2.hpp"
 #include "glm/ext/vector_float4.hpp"
+#include <Metal/Metal.hpp>
+#include <iostream>
+#include <ostream>
 
 class Square : public ComputePrimitive {
 public:
@@ -39,17 +42,28 @@ public:
   Image(const char *imagePath, glm::vec2 size = glm::vec2(0, 0)) {
     init();
 
-    texture = Renderer::loadTexture(imagePath);
+    texture = Engine::loadTexture(imagePath);
+
+    if (texture == nullptr) {
+      std::cerr << "Image path is invalid : " << imagePath << std::endl;
+      return;
+    }
+
+    origSize = glm::vec2(texture->width(), texture->height());
+
     if (size.x == 0 && size.y == 0) {
-      this->size = glm::vec2(texture->width(), texture->height());
+      this->size = origSize;
     } else {
       this->size = size;
     }
   }
 
+  glm::vec2 imageSize() { return origSize; }
+  glm::vec2 size = glm::vec2(0, 0);
+
 private:
   MTL::Texture *texture = nullptr;
-  glm::vec2 size = glm::vec2(0, 0);
+  glm::vec2 origSize = glm::vec2(0, 0);
   const char *kernelName() const override { return "imageCompute"; }
   void bindUniforms(MTL::ComputeCommandEncoder *encoder) override {
     encoder->setTexture(texture, 1);

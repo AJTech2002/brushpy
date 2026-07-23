@@ -19,3 +19,12 @@ canvas.addLayer(layer)
 
 ```
 
+### Design
+
+- **Python/C++ Engine**
+	- This can independently be run with Python code alone
+	- Can work attached to a specific folder which contains the metadata about the artwork 
+	- This way artworks can be limited to code without needing the visual renderer 
+- **Display**
+- **Interaction**
+

@@ -1,14 +1,15 @@
 #include "compute.h"
-#include "Metal/MTLComputeCommandEncoder.hpp"
-#include "Metal/MTLTexture.hpp"
-#include "Metal/Metal.hpp"
-#include "glm/ext/vector_float2.hpp"
-#include "glm/ext/vector_int2.hpp"
-#include "renderer.h"
-#include <cassert>
+#include "engine.h"
+#include "stb_image.h"
+#include <Foundation/Foundation.hpp>
+#include <Metal/Metal.hpp>
+#include <QuartzCore/QuartzCore.hpp>
+#include <iostream>
+#include <ostream>
+#include <simd/simd.h>
 
 void Compute::init(const char *shaderName) {
-  MTL::Function *computeShader = Renderer::defaultLibrary()->newFunction(
+  MTL::Function *computeShader = Engine::defaultLibrary()->newFunction(
       NS::String::string(shaderName, NS::ASCIIStringEncoding));
 
   MTL::ComputePipelineDescriptor *computePipelineDescriptor =
@@ -18,17 +19,19 @@ void Compute::init(const char *shaderName) {
   NS::Error *error = nullptr;
 
   _metalComputePSO =
-      Renderer::device()->newComputePipelineState(computeShader, &error);
+      Engine::device()->newComputePipelineState(computeShader, &error);
   computeShader->release();
 }
 
 void Compute::setup() {
-  if (Renderer::activeCommandBuffer() == nullptr) {
-    assert("Active command buffer is null. Call Renderer::beginFrame() before "
-           "setup()");
+  if (Engine::activeCommandBuffer() == nullptr) {
+    std::cerr << "Error: no active command buffer. Call "
+                 "Engine::beginCommandBuffer() before using Compute"
+              << std::endl;
     return;
   }
-  _computeEncoder = Renderer::activeCommandBuffer()->computeCommandEncoder();
+
+  _computeEncoder = Engine::activeCommandBuffer()->computeCommandEncoder();
   _computeEncoder->setComputePipelineState(_metalComputePSO);
 }
 

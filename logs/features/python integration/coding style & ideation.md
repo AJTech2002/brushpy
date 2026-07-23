@@ -21,4 +21,14 @@ for i in range(0,10):
 
 ```
 
-### render chain
+### rasterization 
+
+```Python
+
+img = Image("test.png")
+
+# I want to be able to chain commands, perhaps Image is called a 'ComputePrimitive' and you can stack primitives and use one as input to another - or they run one after the other 
+
+img = tint(Image("test.png"), glm::vec4(1.0, 0.0, 0.0, 0.0))
+img = drop_shadow(img)
+```

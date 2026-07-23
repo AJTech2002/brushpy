@@ -1,7 +1,8 @@
 #pragma once
+#include "engine.h"
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/vector_float2.hpp"
-#include "renderer.h"
+#include <iostream>
 
 namespace MTL {
 class Texture;
@@ -17,8 +18,11 @@ public:
   virtual ~Primitive();
 
   Primitive() {
-    if (Renderer::isReady() == false) {
-      assert("Renderer::init() must be called before creating a Primitive");
+    if (Engine::isReady() == false) {
+      std::cerr << "Error: Renderer is not ready. Call Renderer::init() before "
+                   "creating "
+                   "Primitives"
+                << std::endl;
     }
 
     init();
@@ -30,5 +34,4 @@ public:
   virtual void init();
   virtual void render(MTL::Texture *outputTexture, glm::mat4 transform,
                       glm::vec2 start, glm::vec2 end) = 0;
-  
 };

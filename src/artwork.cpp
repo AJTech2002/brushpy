@@ -9,14 +9,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-void artwork1() {
-  auto callbck = [](Renderer *renderer) {
+Canvas *artwork1() {
+  Canvas *canvas = new Canvas(800, 600);
+
+  auto callbck = [canvas](Renderer *renderer) {
     std::cout << "~~ Running Artwork 1 ~~" << std::endl;
-    Canvas *canvas = new Canvas();
 
     Layer *layer = new Layer();
 
-    canvas->addLayer(layer);
+    canvas->add(layer);
 
     Square *square =
         new Square(glm::vec2(100, 100), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
@@ -34,7 +35,7 @@ void artwork1() {
     transform = glm::rotate(transform, glm::radians(45.0f), glm::vec3(0, 0, 1));
     // transform = glm::scale(transform, glm::vec3(2.0f, 1.0f, 1.0f));
 
-    layer->add(image, transform);
+    layer->draw(image, transform);
 
     square->color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
@@ -43,8 +44,11 @@ void artwork1() {
     transform = glm::translate(transform, glm::vec3(300, 300, 0));
     // transform = glm::rotate(transform, glm::radians(30.0f), glm::vec3(0, 0,
     // 1));
-    layer->add(square, transform);
-    layer->add(circle, transform);
+    layer->draw(square, transform);
+    layer->draw(circle, transform);
+    canvas->render();
   };
   Renderer::addDrawCallback(callbck);
+
+  return canvas;
 }

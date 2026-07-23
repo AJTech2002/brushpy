@@ -1,10 +1,12 @@
+#include "canvas.h"
+
 #pragma once
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void artwork1();
+Canvas *artwork1();
 
 #ifdef __cplusplus
 }
