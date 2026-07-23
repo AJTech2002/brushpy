@@ -1,39 +1,44 @@
-
-#include "Renderer.h"
 #include "canvas.h"
 #include "engine.h"
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/vector_float2.hpp"
+#include "glm/ext/vector_float4.hpp"
 #include "glm_caster.h"
 #include "layer.h"
 #include "main.h"
 #include "primitive.h"
 #include "primitives.h"
-#include "pybind11/cast.h"
-#include <array>
-#include <glm/gtc/type_ptr.hpp>
+#include "renderer.h"
 #include <iostream>
+#include <memory>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-static const std::array<float, 16> identity{1, 0, 0, 0, 0, 1, 0, 0,
-                                            0, 0, 1, 0, 0, 0, 0, 1};
+namespace py = pybind11;
 
 PYBIND11_MODULE(bpy, m) {
+  m.doc() = "Python bindings for the Metal Procedural Art Engine";
 
+  // The engine is a process-lifetime singleton; intentionally never freed,
+  // same as any other "lives until exit" global.
   Engine *engine = new Engine();
   engine->init();
 
+  // ==== Engine ====
+
   m.def(
       "engine", []() { return &Engine::instance(); },
-      pybind11::return_value_policy::reference);
+      py::return_value_policy::reference);
 
-  m.doc() = "Python bindings for the Metal Procedural Art Engine";
+  // ==== Window / app lifecycle ====
 
-  m.def("display", [](Canvas *canvas) {
-    std::cout << "Opening BrushPY Window" << std::endl;
-    openWindow(canvas);
-  });
+  m.def(
+      "display",
+      [](Canvas *canvas) {
+        std::cout << "Opening BrushPY Window" << std::endl;
+        openWindow(canvas);
+      },
+      py::arg("canvas"));
 
   m.def("close", []() { closeWindow(); });
 
@@ -41,59 +46,87 @@ PYBIND11_MODULE(bpy, m) {
   // display() so the window stays responsive while Python keeps running.
   m.def("poll_events", []() { pollEvents(); });
 
-  // Take in function pointer and add it to the draw callbacks
-  m.def("render", [](pybind11::function callback) {
-    Renderer::addDrawCallback(
-        [callback](Renderer *renderer) { callback(renderer); });
-  });
+  // Registers a callback to run on the Renderer's next draw pass.
+  m.def(
+      "render",
+      [](py::function callback) {
+        Renderer::addDrawCallback(
+            [callback](Renderer *renderer) { callback(renderer); });
+      },
+      py::arg("callback"));
 
-  pybind11::class_<Canvas>(m, "Canvas")
-      .def(pybind11::init<>(
-               [](int width, int height) { return new Canvas(width, height); }),
-           pybind11::arg("width"), pybind11::arg("height"))
+  m.def("startCommandBuffer", []() { Engine::beginCommandBuffer(); });
+
+  m.def("endCommandBuffer", []() { Engine::endCommandBuffer(); });
+
+  // ==== Canvas ====
+
+  py::class_<Canvas>(m, "Canvas")
+      .def(py::init<int, int>(), py::arg("width"), py::arg("height"))
       .def("render", &Canvas::render)
-      .def("renderOut", &Canvas::renderOut, pybind11::arg("path"))
-      //   .def("draw", &Canvas::draw)
-      .def("addLayer", &Canvas::add)
-      //   .def("layerCount", &Canvas::layerCount)
+      .def("render_out", &Canvas::renderOut, py::arg("path"))
+      .def("add_layer", &Canvas::add, py::arg("layer"))
+      .def("new_layer", &Canvas::newLayer)
       .def("width", &Canvas::width)
-      .def("height", &Canvas::height)
-      .def("newLayer", &Canvas::newLayer);
+      .def("height", &Canvas::height);
 
-  pybind11::class_<Layer>(m, "Layer")
-      .def(pybind11::init<>())
+  // ==== Layer ====
+
+  // Canvas owns every Layer passed to add_layer() / returned by new_layer()
+  // (see the ownership note in canvas.h) and deletes it when the Canvas is
+  // destroyed, so the Python wrapper must not *also* free the underlying
+  // object on GC - hence the py::nodelete holder.
+  py::class_<Layer, std::unique_ptr<Layer, py::nodelete>>(m, "Layer")
+      .def(py::init<>())
+      // Overloaded rather than given pybind default values: a glm-typed
+      // py::arg(...) = value default is cast to a Python object once, at
+      // module-import time, which would make importing bpy at all depend on
+      // the optional `glm` package even for callers who never touch it.
       .def(
           "draw",
-          [](Layer *self, Primitive *primitive, glm::mat4x4 matrix) {
-            self->draw(primitive, matrix, glm::vec2(0, 0));
+          [](Layer *self, Primitive *primitive) { self->draw(primitive); },
+          py::arg("primitive"))
+      .def(
+          "draw",
+          [](Layer *self, Primitive *primitive, glm::mat4x4 transform_px) {
+            self->draw(primitive, transform_px);
           },
-          pybind11::arg("primitive"), pybind11::arg("matrix") = identity);
+          py::arg("primitive"), py::arg("transform_px"))
+      .def(
+          "draw",
+          [](Layer *self, Primitive *primitive, glm::mat4x4 transform_px,
+             glm::vec2 size_px) {
+            self->draw(primitive, transform_px, size_px);
+          },
+          py::arg("primitive"), py::arg("transform_px"), py::arg("size_px"));
 
-  pybind11::class_<Primitive>(m, "Primitive").def("render", &Primitive::render);
+  // ==== Primitives ====
 
-  pybind11::class_<Square, Primitive>(m, "Square")
-      .def(pybind11::init([](float width, float height, float r, float g,
-                             float b, float a) {
-             return Square(glm::vec2(width, height), glm::vec4(r, g, b, a));
-           }),
-           pybind11::arg("width"), pybind11::arg("height"), pybind11::arg("r"),
-           pybind11::arg("g"), pybind11::arg("b"), pybind11::arg("a"))
+  py::class_<Primitive>(m, "Primitive")
+      .def("render", &Primitive::render, py::arg("output_texture"),
+           py::arg("transform"), py::arg("start"), py::arg("end"));
+
+  py::class_<Square, Primitive>(m, "Square")
+      .def(py::init<glm::vec2, glm::vec4>(), py::arg("size"), py::arg("color"))
       .def_readwrite("size", &Square::size)
       .def_readwrite("color", &Square::color);
 
-  pybind11::class_<Circle, Primitive>(m, "Circle")
-      .def(pybind11::init([](float width, float height, float r, float g,
-                             float b, float a) {
-             return Circle(glm::vec2(width, height), glm::vec4(r, g, b, a));
-           }),
-           pybind11::arg("width"), pybind11::arg("height"), pybind11::arg("r"),
-           pybind11::arg("g"), pybind11::arg("b"), pybind11::arg("a"))
+  py::class_<Circle, Primitive>(m, "Circle")
+      .def(py::init<glm::vec2, glm::vec4>(), py::arg("size"), py::arg("color"))
       .def_readwrite("size", &Circle::size)
       .def_readwrite("color", &Circle::color);
 
-  pybind11::class_<Image, Primitive>(m, "Image")
-      .def(pybind11::init([](const char *imagePath) {
-        return Image(imagePath, glm::vec2(0, 0));
-      }))
-      .def("setSize", [](Image *self, glm::vec2 size) { self->size = size; });
+  py::class_<Image, Primitive>(m, "Image")
+      // Same reasoning as Layer::draw above: overloaded instead of given a
+      // glm-typed pybind default, so importing bpy never requires `glm`.
+      .def(py::init([](const char *imagePath) { return new Image(imagePath); }),
+           py::arg("image_path"))
+      .def(py::init([](const char *imagePath, glm::vec2 size) {
+             return new Image(imagePath, size);
+           }),
+           py::arg("image_path"), py::arg("size"))
+      .def(
+          "set_size", [](Image *self, glm::vec2 size) { self->size = size; },
+          py::arg("size"))
+      .def_readwrite("size", &Image::size);
 }

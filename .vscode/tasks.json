@@ -56,6 +56,24 @@
             "problemMatcher": [
                 "$gcc"
             ]
+        },
+        {
+            "label": "viewer",
+            "type": "shell",
+            "command": "source /Users/ajayvenkat/Development/metal-procedural-art/.venv/bin/activate && python ./viewer.py ./artworks",
+            "group": {
+                "kind": "build",
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
         }
     ]
 }

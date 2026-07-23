@@ -1,8 +1,6 @@
 #pragma once
 #include "Metal/MTLTexture.hpp"
 #include "glm/ext/vector_int2.hpp"
-#include <objc/objc.h>
-#include <string>
 
 namespace MTL {
 class ComputePipelineState;
@@ -12,13 +10,15 @@ class ComputeCommandEncoder;
 class Compute {
 
 public:
+  virtual ~Compute() = default;
+
+  // Compiles (or reuses a cached) pipeline state for `shaderName`. Pipeline
+  // states are cached process-wide and keyed by shader name, since every
+  // Primitive instance of the same kind (e.g. every Square) would otherwise
+  // recompile an identical pipeline on construction. `_metalComputePSO` is
+  // therefore a non-owning reference to the cached entry and must not be
+  // released by instances of this class.
   void init(const char *shaderName);
-  void setDispatchProperties(int w, int h, int tW, int tH) {
-    this->width = w;
-    this->height = h;
-    this->threadGroupWidth = tW;
-    this->threadGroupHeight = tH;
-  }
   virtual void setup();
   virtual void bind();
   virtual void dispatch(int width, int height, int threadGroupWidth,
@@ -29,20 +29,16 @@ public:
   MTL::ComputeCommandEncoder *computeEncoder() const { return _computeEncoder; }
 
 protected:
-  MTL::ComputePipelineState *_metalComputePSO;
-  MTL::ComputeCommandEncoder *_computeEncoder;
-  int width;
-  int height;
-  int threadGroupWidth;
-  int threadGroupHeight;
+  MTL::ComputePipelineState *_metalComputePSO = nullptr;
+  MTL::ComputeCommandEncoder *_computeEncoder = nullptr;
 };
 
-typedef struct {
+struct CompositeComputeParams {
   MTL::Texture *src;
   MTL::Texture *dst;
   glm::ivec2 start = glm::ivec2(0, 0);
   glm::ivec2 end = glm::ivec2(0, 0);
-} CompositeComputeParams;
+};
 
 class CompositeCompute : public Compute {
 

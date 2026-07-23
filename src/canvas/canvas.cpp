@@ -60,12 +60,7 @@ Canvas::Canvas(int width, int height) {
   init();
 }
 
-Canvas::~Canvas() {
-  if (_outputTexture) {
-    _outputTexture->release();
-    _outputTexture = nullptr;
-  }
-}
+Canvas::~Canvas() { dispose(); }
 
 void Canvas::init() {
   compositor.init();
@@ -128,5 +123,12 @@ void Canvas::draw() {
 void Canvas::dispose() {
   for (Layer *layer : _layers) {
     layer->dispose();
+    delete layer;
+  }
+  _layers.clear();
+
+  if (_outputTexture) {
+    _outputTexture->release();
+    _outputTexture = nullptr;
   }
 }

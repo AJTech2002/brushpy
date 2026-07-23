@@ -58,6 +58,13 @@ public:
     }
   }
 
+  ~Image() override {
+    if (texture) {
+      texture->release();
+      texture = nullptr;
+    }
+  }
+
   glm::vec2 imageSize() { return origSize; }
   glm::vec2 size = glm::vec2(0, 0);
 

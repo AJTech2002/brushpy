@@ -7,8 +7,22 @@
 #include <iostream>
 #include <ostream>
 #include <simd/simd.h>
+#include <string>
+#include <unordered_map>
+
+// Process-wide cache of compiled pipeline states, keyed by shader name.
+// Owns every entry for the lifetime of the process; Compute instances only
+// ever hold a non-owning pointer into this map.
+static std::unordered_map<std::string, MTL::ComputePipelineState *>
+    pipelineStateCache;
 
 void Compute::init(const char *shaderName) {
+  auto cached = pipelineStateCache.find(shaderName);
+  if (cached != pipelineStateCache.end()) {
+    _metalComputePSO = cached->second;
+    return;
+  }
+
   MTL::Function *computeShader = Engine::defaultLibrary()->newFunction(
       NS::String::string(shaderName, NS::ASCIIStringEncoding));
 
@@ -21,6 +35,9 @@ void Compute::init(const char *shaderName) {
   _metalComputePSO =
       Engine::device()->newComputePipelineState(computeShader, &error);
   computeShader->release();
+  computePipelineDescriptor->release();
+
+  pipelineStateCache[shaderName] = _metalComputePSO;
 }
 
 void Compute::setup() {
@@ -50,7 +67,8 @@ void Compute::dispatch(int width, int height, int threadGroupWidth,
 void CompositeCompute::bind() {
 
   if (_computeEncoder == nullptr) {
-    assert("Compute encoder is null. Call setup() before bind()");
+    std::cerr << "Error: Compute encoder is null. Call setup() before bind()"
+              << std::endl;
     return;
   }
 
@@ -62,7 +80,4 @@ void CompositeCompute::bind() {
 
   _computeEncoder->setBytes(&start, sizeof(glm::ivec2), 0);
   _computeEncoder->setBytes(&end, sizeof(glm::ivec2), 1);
-
-  // TODO: Make thread group size configurable
-  setDispatchProperties(end.x - start.x, end.y - start.y, 16, 16);
 }

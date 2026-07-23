@@ -5,52 +5,68 @@ from __future__ import annotations
 import collections.abc
 import glm
 import typing
-__all__: list[str] = ['Canvas', 'Circle', 'Image', 'Layer', 'Primitive', 'Square', 'close', 'display', 'engine', 'poll_events', 'render']
+__all__: list[str] = ['Canvas', 'Circle', 'Image', 'Layer', 'Primitive', 'Square', 'close', 'display', 'endCommandBuffer', 'engine', 'poll_events', 'render', 'startCommandBuffer']
 class Canvas:
     def __init__(self, width: typing.SupportsInt | typing.SupportsIndex, height: typing.SupportsInt | typing.SupportsIndex) -> None:
         ...
-    def addLayer(self, arg0: Layer) -> None:
+    def add_layer(self, layer: Layer) -> None:
         ...
     def height(self) -> int:
         ...
-    def newLayer(self) -> Layer:
+    def new_layer(self) -> Layer:
         ...
     def render(self) -> None:
         ...
-    def renderOut(self, path: str) -> None:
+    def render_out(self, path: str) -> None:
         ...
     def width(self) -> int:
         ...
 class Circle(Primitive):
     color: glm.vec4
     size: glm.vec2
-    def __init__(self, width: typing.SupportsFloat | typing.SupportsIndex, height: typing.SupportsFloat | typing.SupportsIndex, r: typing.SupportsFloat | typing.SupportsIndex, g: typing.SupportsFloat | typing.SupportsIndex, b: typing.SupportsFloat | typing.SupportsIndex, a: typing.SupportsFloat | typing.SupportsIndex) -> None:
+    def __init__(self, size: glm.vec2, color: glm.vec4) -> None:
         ...
 class Image(Primitive):
-    def __init__(self, arg0: str) -> None:
+    size: glm.vec2
+    @typing.overload
+    def __init__(self, image_path: str) -> None:
         ...
-    def setSize(self, arg0: glm.vec2) -> None:
+    @typing.overload
+    def __init__(self, image_path: str, size: glm.vec2) -> None:
+        ...
+    def set_size(self, size: glm.vec2) -> None:
         ...
 class Layer:
     def __init__(self) -> None:
         ...
-    def draw(self, primitive: Primitive, matrix: glm.mat4x4 = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]) -> None:
+    @typing.overload
+    def draw(self, primitive: Primitive) -> None:
+        ...
+    @typing.overload
+    def draw(self, primitive: Primitive, transform_px: glm.mat4x4) -> None:
+        ...
+    @typing.overload
+    def draw(self, primitive: Primitive, transform_px: glm.mat4x4, size_px: glm.vec2) -> None:
         ...
 class Primitive:
-    def render(self, arg0: ..., arg1: glm.mat4x4, arg2: glm.vec2, arg3: glm.vec2) -> None:
+    def render(self, output_texture: ..., transform: glm.mat4x4, start: glm.vec2, end: glm.vec2) -> None:
         ...
 class Square(Primitive):
     color: glm.vec4
     size: glm.vec2
-    def __init__(self, width: typing.SupportsFloat | typing.SupportsIndex, height: typing.SupportsFloat | typing.SupportsIndex, r: typing.SupportsFloat | typing.SupportsIndex, g: typing.SupportsFloat | typing.SupportsIndex, b: typing.SupportsFloat | typing.SupportsIndex, a: typing.SupportsFloat | typing.SupportsIndex) -> None:
+    def __init__(self, size: glm.vec2, color: glm.vec4) -> None:
         ...
 def close() -> None:
     ...
-def display(arg0: Canvas) -> None:
+def display(canvas: Canvas) -> None:
+    ...
+def endCommandBuffer() -> None:
     ...
 def engine() -> Engine:
     ...
 def poll_events() -> None:
     ...
-def render(arg0: collections.abc.Callable) -> None:
+def render(callback: collections.abc.Callable) -> None:
+    ...
+def startCommandBuffer() -> None:
     ...

@@ -41,9 +41,16 @@ void Layer::draw(Primitive *primitive, glm::mat4x4 transformPx,
     end = glm::vec2(center.x + sizePx.x / 2, center.y + sizePx.y / 2);
   }
 
+  // Don't block on GPU completion here: command buffers submitted to the
+  // same queue execute in commit order and Metal's hazard tracking already
+  // serializes reads/writes to `_texture` across them, so callers that chain
+  // many draw() calls (e.g. one primitive per frame element) keep the GPU
+  // pipeline fed instead of stalling the CPU after every primitive. Callers
+  // that need the result on the CPU (Canvas::render/renderOut) wait
+  // themselves once, after all drawing is done.
   Engine::beginCommandBuffer("Layer::draw");
   primitive->render(_texture, inverseTransform, start, end);
-  Engine::endCommandBuffer(true);
+  Engine::endCommandBuffer(false);
 }
 
 void Layer::dispose() {}

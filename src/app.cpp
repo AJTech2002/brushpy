@@ -1,5 +1,5 @@
 #include "app.h"
-#include "Renderer.h"
+#include "renderer.h"
 #include "engine.h"
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
