@@ -12,21 +12,17 @@ class Compute {
 public:
   virtual ~Compute() = default;
 
-  // Compiles (or reuses a cached) pipeline state for `shaderName`. Pipeline
-  // states are cached process-wide and keyed by shader name, since every
-  // Primitive instance of the same kind (e.g. every Square) would otherwise
-  // recompile an identical pipeline on construction. `_metalComputePSO` is
-  // therefore a non-owning reference to the cached entry and must not be
-  // released by instances of this class.
   void init(const char *shaderName);
+  void init(const char *shaderName, MTL::ComputeCommandEncoder *encoder);
   virtual void setup();
   virtual void bind();
   virtual void dispatch(int width, int height, int threadGroupWidth,
-                        int threadGroupHeight);
+                        int threadGroupHeight, bool endEncoding);
   const MTL::ComputePipelineState *metalComputePSO() const {
     return _metalComputePSO;
   }
   MTL::ComputeCommandEncoder *computeEncoder() const { return _computeEncoder; }
+  void setEncoder(MTL::ComputeCommandEncoder *encoder) { _computeEncoder = encoder; }
 
 protected:
   MTL::ComputePipelineState *_metalComputePSO = nullptr;
@@ -45,12 +41,12 @@ class CompositeCompute : public Compute {
 public:
   CompositeCompute() : Compute() {}
   void init() { Compute::init("compositeCompute"); }
-  void run(CompositeComputeParams params) {
+  void run(CompositeComputeParams params, bool endEncoding) {
     this->params = params;
     setup();
     bind();
-    dispatch(params.end.x - params.start.x, params.end.y - params.start.y, 8,
-             8);
+    dispatch(params.end.x - params.start.x, params.end.y - params.start.y, 8, 8,
+             endEncoding);
   }
 
 protected:
@@ -58,4 +54,23 @@ protected:
 
 private:
   CompositeComputeParams params = {};
+};
+
+class ClearCompute : public Compute {
+
+public:
+  ClearCompute() : Compute() {}
+  void init() { Compute::init("clearCompute"); }
+  void run(MTL::Texture *target, int width, int height, bool endEncoding) {
+    this->target = target;
+    setup();
+    bind();
+    dispatch(width, height, 8, 8, endEncoding);
+  }
+
+protected:
+  void bind() override;
+
+private:
+  MTL::Texture *target = nullptr;
 };

@@ -59,6 +59,13 @@ PYBIND11_MODULE(bpy, m) {
 
   m.def("endCommandBuffer", []() { Engine::endCommandBuffer(); });
 
+  // === Image Proceesing ===
+  m.def("tint", [](Primitive *input, glm::vec4 color) {
+    TintFunction *tintFunction = new TintFunction(input, color);
+    // tintFunction->setColor(color);
+    return tintFunction;
+  });
+
   // ==== Canvas ====
 
   py::class_<Canvas>(m, "Canvas")
@@ -102,9 +109,8 @@ PYBIND11_MODULE(bpy, m) {
 
   // ==== Primitives ====
 
-  py::class_<Primitive>(m, "Primitive")
-      .def("render", &Primitive::render, py::arg("output_texture"),
-           py::arg("transform"), py::arg("start"), py::arg("end"));
+  py::class_<Primitive>(m, "Primitive").def(py::init<>());
+  py::class_<TintFunction, Primitive>(m, "TintFunction").def(py::init<>());
 
   py::class_<Square, Primitive>(m, "Square")
       .def(py::init<glm::vec2, glm::vec4>(), py::arg("size"), py::arg("color"))

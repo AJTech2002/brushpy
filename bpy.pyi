@@ -5,7 +5,7 @@ from __future__ import annotations
 import collections.abc
 import glm
 import typing
-__all__: list[str] = ['Canvas', 'Circle', 'Image', 'Layer', 'Primitive', 'Square', 'close', 'display', 'endCommandBuffer', 'engine', 'poll_events', 'render', 'startCommandBuffer']
+__all__: list[str] = ['Canvas', 'Circle', 'Image', 'Layer', 'Primitive', 'Square', 'TintFunction', 'close', 'display', 'endCommandBuffer', 'engine', 'poll_events', 'render', 'startCommandBuffer', 'tint']
 class Canvas:
     def __init__(self, width: typing.SupportsInt | typing.SupportsIndex, height: typing.SupportsInt | typing.SupportsIndex) -> None:
         ...
@@ -49,12 +49,15 @@ class Layer:
     def draw(self, primitive: Primitive, transform_px: glm.mat4x4, size_px: glm.vec2) -> None:
         ...
 class Primitive:
-    def render(self, output_texture: ..., transform: glm.mat4x4, start: glm.vec2, end: glm.vec2) -> None:
+    def __init__(self) -> None:
         ...
 class Square(Primitive):
     color: glm.vec4
     size: glm.vec2
     def __init__(self, size: glm.vec2, color: glm.vec4) -> None:
+        ...
+class TintFunction(Primitive):
+    def __init__(self) -> None:
         ...
 def close() -> None:
     ...
@@ -69,4 +72,6 @@ def poll_events() -> None:
 def render(callback: collections.abc.Callable) -> None:
     ...
 def startCommandBuffer() -> None:
+    ...
+def tint(arg0: Primitive, arg1: glm.vec4) -> TintFunction:
     ...

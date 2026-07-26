@@ -21,7 +21,7 @@ public:
   // void draw(Canvas *canvas, glm::vec2 position, glm::vec2 region);
   void dispose();
   void draw(Primitive *primitive, glm::mat4x4 transformPx = glm::mat4x4(1.0f),
-            glm::vec2 sizePx = glm::vec2(0.0f, 0.0f));
+            glm::vec2 drawRegion = glm::vec2(0.0f, 0.0f));
 
   int width() const { return _width; }
   int height() const { return _height; }
@@ -31,4 +31,5 @@ private:
   int _width = 0;
   int _height = 0;
   MTL::Texture *_texture = nullptr;
+  MTL::Texture *_scratch = nullptr;
 };

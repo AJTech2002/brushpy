@@ -6,7 +6,8 @@
 
 namespace MTL {
 class Texture;
-};
+class ComputeCommandEncoder;
+}; // namespace MTL
 
 /*
   Primitive is an abstract base class for all drawable objects in the canvas.
@@ -28,10 +29,8 @@ public:
     init();
   }
 
-  virtual std::string blendFn() const {
-    return "return float4(CUR, COL, COL.a);";
-  }
   virtual void init();
-  virtual void render(MTL::Texture *outputTexture, glm::mat4 transform,
-                      glm::vec2 start, glm::vec2 end) = 0;
+  virtual void run(int width, int height);
+  virtual void run(int width, int height, bool endEncoding);
+  virtual void setEncoder(MTL::ComputeCommandEncoder *encoder) {}
 };

@@ -73,7 +73,39 @@ private:
   glm::vec2 origSize = glm::vec2(0, 0);
   const char *kernelName() const override { return "imageCompute"; }
   void bindUniforms(MTL::ComputeCommandEncoder *encoder) override {
-    encoder->setTexture(texture, 1);
+    encoder->setTexture(texture, 2);
     encoder->setBytes(&size, sizeof(glm::vec2), 3);
   }
+};
+
+// For functions like tint, which take a Primitive as input and produce a new
+// Primitive as output, we can create a Function class that wraps the input
+// Primitive and applies the function in its run() method. This allows us to
+// chain functions together and create complex effects.
+class TintFunction : public ComputePrimitive {
+public:
+  TintFunction() {}
+  TintFunction(Primitive *input, glm::vec4 color) {
+    inputPrimitive = input;
+    this->color = color;
+    init();
+  }
+  void run(int width, int height, bool endEncoding) override {
+    MTL::ComputeCommandEncoder *encoder = compute.computeEncoder();
+    inputPrimitive->setEncoder(encoder);
+    inputPrimitive->run(width, height, false);
+
+    compute.setup();
+    bindUniforms(encoder);
+    compute.dispatch(width, height, threadGroupWidth(), threadGroupHeight(),
+                     endEncoding);
+  }
+
+private:
+  const char *kernelName() const override { return "tintCompute"; }
+  void bindUniforms(MTL::ComputeCommandEncoder *encoder) override {
+    encoder->setBytes(&color, sizeof(glm::vec4), 4);
+  }
+  Primitive *inputPrimitive;
+  glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 };

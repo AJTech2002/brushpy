@@ -22,10 +22,10 @@ CompositeCompute compositor = CompositeCompute();
   file - rename is atomic within the same filesystem.
 */
 static void writeTextureToPNG(MTL::Texture *texture, int width, int height,
-                               const std::string &path) {
+                              const std::string &path) {
   std::vector<float> floatPixels(static_cast<size_t>(width) * height * 4);
   texture->getBytes(floatPixels.data(), width * 4 * sizeof(float),
-                     MTL::Region(0, 0, 0, width, height, 1), 0);
+                    MTL::Region(0, 0, 0, width, height, 1), 0);
 
   std::vector<uint8_t> pixels(floatPixels.size());
   for (size_t i = 0; i < pixels.size(); i++) {
@@ -40,10 +40,9 @@ static void writeTextureToPNG(MTL::Texture *texture, int width, int height,
 
   std::filesystem::path tmpPath = outPath;
   tmpPath += ".tmp";
-  if (!stbi_write_png(tmpPath.string().c_str(), width, height, 4,
-                       pixels.data(), width * 4)) {
-    std::cerr << "Canvas::renderOut: failed to write " << tmpPath
-              << std::endl;
+  if (!stbi_write_png(tmpPath.string().c_str(), width, height, 4, pixels.data(),
+                      width * 4)) {
+    std::cerr << "Canvas::renderOut: failed to write " << tmpPath << std::endl;
     return;
   }
 
@@ -105,19 +104,25 @@ void Canvas::add(Layer *layer) {
 }
 
 void Canvas::draw() {
+  Engine::beginCommandBuffer("Layer::draw");
+
   // Loop through Layers backwards and composite them onto the output texture
   for (int i = _layers.size() - 1; i >= 0; i--) {
     Layer *layer = _layers[i];
 
     // TODO: Optimize this by only running the compositor if the layer is dirty
     // and within dirty regions
-    compositor.run({
-        .src = layer->texture(),
-        .dst = _outputTexture,
-        .start = glm::ivec2(0, 0),
-        .end = glm::ivec2(width(), height()),
-    });
+    compositor.run(
+        {
+            .src = layer->texture(),
+            .dst = _outputTexture,
+            .start = glm::ivec2(0, 0),
+            .end = glm::ivec2(width(), height()),
+        },
+        true);
   }
+
+  Engine::endCommandBuffer(false);
 }
 
 void Canvas::dispose() {

@@ -16,6 +16,12 @@
 static std::unordered_map<std::string, MTL::ComputePipelineState *>
     pipelineStateCache;
 
+void Compute::init(const char *shaderName,
+                   MTL::ComputeCommandEncoder *encoder) {
+  init(shaderName);
+  _computeEncoder = encoder;
+}
+
 void Compute::init(const char *shaderName) {
   auto cached = pipelineStateCache.find(shaderName);
   if (cached != pipelineStateCache.end()) {
@@ -48,18 +54,24 @@ void Compute::setup() {
     return;
   }
 
-  _computeEncoder = Engine::activeCommandBuffer()->computeCommandEncoder();
+  // _computeEncoder = Engine::activeCommandBuffer()->computeCommandEncoder();
+  if (_computeEncoder == nullptr) {
+    _computeEncoder = Engine::activeCommandBuffer()->computeCommandEncoder();
+  }
   _computeEncoder->setComputePipelineState(_metalComputePSO);
 }
 
 void Compute::bind() { return; }
 
 void Compute::dispatch(int width, int height, int threadGroupWidth,
-                       int threadGroupHeight) {
+                       int threadGroupHeight, bool endEncoding) {
   MTL::Size gridSize = MTL::Size(width, height, 1);
   MTL::Size threadGroupSize = MTL::Size(threadGroupWidth, threadGroupHeight, 1);
   _computeEncoder->dispatchThreads(gridSize, threadGroupSize);
-  _computeEncoder->endEncoding();
+  if (endEncoding) {
+    _computeEncoder->endEncoding();
+  }
+  _computeEncoder = nullptr;
 }
 
 // - Compositor Implementation -
@@ -80,4 +92,15 @@ void CompositeCompute::bind() {
 
   _computeEncoder->setBytes(&start, sizeof(glm::ivec2), 0);
   _computeEncoder->setBytes(&end, sizeof(glm::ivec2), 1);
+}
+
+// - Clear Implementation -
+void ClearCompute::bind() {
+  if (_computeEncoder == nullptr) {
+    std::cerr << "Error: Compute encoder is null. Call setup() before bind()"
+              << std::endl;
+    return;
+  }
+
+  _computeEncoder->setTexture(target, 0);
 }

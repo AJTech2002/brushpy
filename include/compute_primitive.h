@@ -1,12 +1,22 @@
 #pragma once
+#include "Metal/MTLComputeCommandEncoder.hpp"
 #include "compute.h"
 #include "primitive.h"
 
 class ComputePrimitive : public Primitive {
 public:
-  void init() override;
-  void render(MTL::Texture *outputTexture, glm::mat4 transform, glm::vec2 start,
-              glm::vec2 end) override;
+  void init() override {
+    //
+    compute.init(kernelName());
+  }
+  void init(MTL::ComputeCommandEncoder *encoder) {
+    compute.init(kernelName(), encoder);
+  }
+  void run(int width, int height) override;
+  void run(int width, int height, bool endEncoding) override;
+  void setEncoder(MTL::ComputeCommandEncoder *encoder) override {
+    compute.setEncoder(encoder);
+  }
 
 protected:
   virtual const char *kernelName() const = 0;
